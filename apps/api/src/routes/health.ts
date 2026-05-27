@@ -1,0 +1,9 @@
+import type { FastifyPluginAsync } from "fastify";
+
+export const registerHealthRoutes: FastifyPluginAsync = async (app) => {
+  app.get("/health", async () => ({
+    status: "ok",
+    service: "campusforge-api",
+    version: "0.1.0",
+  }));
+};

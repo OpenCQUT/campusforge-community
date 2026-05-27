@@ -1,0 +1,25 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Builds
+.next
+dist
+build
+coverage
+.turbo
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Database
+*.db
+*.sqlite
+
+# Logs
+*.log
+.DS_Store
+# Husky
+.husky/_
