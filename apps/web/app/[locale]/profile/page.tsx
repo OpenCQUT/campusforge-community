@@ -40,18 +40,92 @@ interface GitHubStats {
   totalContributions: number;
   totalPrs: number;
   totalIssues: number;
+  totalCommits: number;
   contributionWeeks: ContributionWeek[];
-  orgStats: {
-    name: string;
-    prs: number;
-    issues: number;
-  }[];
   ossContributions: {
-    org: string;
+    repo: string;
+    owner: string;
+    url: string;
+    stars: number;
     prs: number;
     issues: number;
+    commits: number;
+    isOpenCqut: boolean;
   }[];
 
+}
+
+interface GitHubSearchItem {
+  repository_url?: string;
+}
+
+interface GitHubCommitSearchItem {
+  repository?: {
+    full_name?: string;
+    html_url?: string;
+    stargazers_count?: number;
+    owner?: {
+      login?: string;
+    };
+  };
+}
+
+interface GitHubRepo {
+  full_name: string;
+  html_url: string;
+  stargazers_count: number;
+  owner: {
+    login: string;
+  };
+}
+
+interface RepoContribution {
+  repo: string;
+  owner: string;
+  url: string;
+  stars: number;
+  prs: number;
+  issues: number;
+  commits: number;
+  isOpenCqut: boolean;
+}
+
+function getRepoFullName(repositoryUrl?: string): string | null {
+  if (!repositoryUrl) return null;
+  const marker = "/repos/";
+  const markerIndex = repositoryUrl.indexOf(marker);
+  if (markerIndex === -1) return null;
+  return repositoryUrl.slice(markerIndex + marker.length);
+}
+
+async function readJson<T>(response: Response, fallback: T): Promise<T> {
+  if (!response.ok) return fallback;
+  return response.json() as Promise<T>;
+}
+
+async function addIssueSearchResults(
+  target: Map<string, RepoContribution>,
+  response: Response,
+  kind: "prs" | "issues",
+) {
+  const data = await readJson<{ total_count?: number; items?: GitHubSearchItem[] }>(response, { total_count: 0, items: [] });
+  for (const item of data.items ?? []) {
+    const fullName = getRepoFullName(item.repository_url);
+    if (!fullName) continue;
+    const existing = target.get(fullName) ?? {
+      repo: fullName,
+      owner: fullName.split("/")[0] ?? "",
+      url: `https://github.com/${fullName}`,
+      stars: 0,
+      prs: 0,
+      issues: 0,
+      commits: 0,
+      isOpenCqut: fullName.toLowerCase().startsWith("opencqut/"),
+    };
+    existing[kind] += 1;
+    target.set(fullName, existing);
+  }
+  return data.total_count ?? 0;
 }
 
 
@@ -148,27 +222,15 @@ export default function ProfilePage() {
     setGhLoading(true);
     setGhError("");
     try {
-      // Major open source organizations to track
-      const majorOrgs = ["facebook", "microsoft", "google", "apache", "vercel", "nextui-org", "shadcn-ui"];
-
-      // Fetch activity totals, contribution graph, and organization stats in parallel.
-      const [contribRes, totalPrRes, totalIssueRes, openCqutPrRes, openCqutIssueRes, ...orgResults] = await Promise.all([
+      const searchHeaders = { Accept: "application/vnd.github+json" };
+      const [contribRes, prSearchRes, issueSearchRes, commitSearchRes] = await Promise.all([
         fetch(`https://github-contributions-api.jogruber.de/v4/${username}?y=last`),
-        fetch(`https://api.github.com/search/issues?q=author:${username}+type:pr&per_page=1`),
-        fetch(`https://api.github.com/search/issues?q=author:${username}+type:issue&per_page=1`),
-        fetch(`https://api.github.com/search/issues?q=author:${username}+type:pr+org:OpenCQUT&per_page=1`),
-        fetch(`https://api.github.com/search/issues?q=author:${username}+type:issue+org:OpenCQUT&per_page=1`),
-        ...majorOrgs.flatMap(org => [
-          fetch(`https://api.github.com/search/issues?q=author:${username}+type:pr+org:${org}&per_page=1`),
-          fetch(`https://api.github.com/search/issues?q=author:${username}+type:issue+org:${org}&per_page=1`),
-        ]),
+        fetch(`https://api.github.com/search/issues?q=author:${username}+type:pr&per_page=100`, { headers: searchHeaders }),
+        fetch(`https://api.github.com/search/issues?q=author:${username}+type:issue&per_page=100`, { headers: searchHeaders }),
+        fetch(`https://api.github.com/search/commits?q=author:${username}&per_page=100`, { headers: searchHeaders }),
       ]);
 
       const contribData = contribRes.ok ? await contribRes.json() : { contributions: [], total: { lastYear: 0 } };
-      const totalPrData = totalPrRes.ok ? await totalPrRes.json() : { total_count: 0 };
-      const totalIssueData = totalIssueRes.ok ? await totalIssueRes.json() : { total_count: 0 };
-      const openCqutPrData = openCqutPrRes.ok ? await openCqutPrRes.json() : { total_count: 0 };
-      const openCqutIssueData = openCqutIssueRes.ok ? await openCqutIssueRes.json() : { total_count: 0 };
 
       // Parse contribution weeks from the API response
       const contributionWeeks: ContributionWeek[] = [];
@@ -184,32 +246,64 @@ export default function ProfilePage() {
         });
       }
 
-      // Parse major org contributions
-      const ossContributions: GitHubStats["ossContributions"] = [];
-      for (let i = 0; i < majorOrgs.length; i++) {
+      const repoContributions = new Map<string, RepoContribution>();
+      const [totalPrs, totalIssues, commitData] = await Promise.all([
+        addIssueSearchResults(repoContributions, prSearchRes, "prs"),
+        addIssueSearchResults(repoContributions, issueSearchRes, "issues"),
+        readJson<{ total_count?: number; items?: GitHubCommitSearchItem[] }>(commitSearchRes, { total_count: 0, items: [] }),
+      ]);
 
-        const org = majorOrgs[i]!;
-        const prRes = orgResults[i * 2];
-        const issueRes = orgResults[i * 2 + 1];
-        const prData = prRes?.ok ? await prRes.json() : { total_count: 0 };
-        const issueData = issueRes?.ok ? await issueRes.json() : { total_count: 0 };
-        const prs = prData.total_count ?? 0;
-        const issues = issueData.total_count ?? 0;
-        if (prs > 0 || issues > 0) {
-          ossContributions.push({ org, prs, issues });
-        }
+      for (const item of commitData.items ?? []) {
+        const repo = item.repository;
+        const fullName = repo?.full_name;
+        if (!fullName) continue;
+        const existing = repoContributions.get(fullName) ?? {
+          repo: fullName,
+          owner: repo.owner?.login ?? fullName.split("/")[0] ?? "",
+          url: repo.html_url ?? `https://github.com/${fullName}`,
+          stars: repo.stargazers_count ?? 0,
+          prs: 0,
+          issues: 0,
+          commits: 0,
+          isOpenCqut: fullName.toLowerCase().startsWith("opencqut/"),
+        };
+        existing.commits += 1;
+        existing.stars = Math.max(existing.stars, repo.stargazers_count ?? 0);
+        repoContributions.set(fullName, existing);
       }
+
+      const reposNeedingStars = [...repoContributions.values()].filter((repo) => repo.stars === 0);
+      const repoDetailResults = await Promise.all(
+        reposNeedingStars.slice(0, 80).map(async (repo) => {
+          const response = await fetch(`https://api.github.com/repos/${repo.repo}`, { headers: searchHeaders });
+          return readJson<GitHubRepo | null>(response, null);
+        }),
+      );
+
+      for (const repoDetail of repoDetailResults) {
+        if (!repoDetail?.full_name) continue;
+        const existing = repoContributions.get(repoDetail.full_name);
+        if (!existing) continue;
+        existing.owner = repoDetail.owner.login;
+        existing.url = repoDetail.html_url;
+        existing.stars = repoDetail.stargazers_count;
+        existing.isOpenCqut = repoDetail.owner.login.toLowerCase() === "opencqut";
+      }
+
+      const ossContributions = [...repoContributions.values()]
+        .filter((repo) => repo.stars >= 1000 || repo.isOpenCqut)
+        .sort((a, b) => {
+          if (a.isOpenCqut !== b.isOpenCqut) return a.isOpenCqut ? -1 : 1;
+          if (b.stars !== a.stars) return b.stars - a.stars;
+          return (b.prs + b.issues + b.commits) - (a.prs + a.issues + a.commits);
+        });
 
       setGhStats({
         totalContributions: contribData.total?.lastYear ?? 0,
-        totalPrs: totalPrData.total_count ?? 0,
-        totalIssues: totalIssueData.total_count ?? 0,
+        totalPrs,
+        totalIssues,
+        totalCommits: commitData.total_count ?? 0,
         contributionWeeks,
-        orgStats: [{
-          name: "OpenCQUT",
-          prs: openCqutPrData.total_count ?? 0,
-          issues: openCqutIssueData.total_count ?? 0,
-        }],
         ossContributions,
       });
     } catch {
@@ -330,14 +424,7 @@ export default function ProfilePage() {
                 <StatBlock label={t("totalContributions")} value={ghStats.totalContributions} />
                 <StatBlock label={t("pullRequests")} value={ghStats.totalPrs} />
                 <StatBlock label={t("issues")} value={ghStats.totalIssues} />
-                {ghStats.orgStats
-                  .filter((org) => org.prs > 0 || org.issues > 0)
-                  .map((org) => (
-                    <React.Fragment key={org.name}>
-                      <StatBlock label={`${org.name} ${t("pullRequests")}`} value={org.prs} />
-                      <StatBlock label={`${org.name} ${t("issues")}`} value={org.issues} />
-                    </React.Fragment>
-                  ))}
+                <StatBlock label={t("commits")} value={ghStats.totalCommits} />
               </div>
 
               {/* Contribution graph */}
@@ -348,16 +435,20 @@ export default function ProfilePage() {
               {/* Major open source contributions */}
               {ghStats.ossContributions.length > 0 && (
                 <div>
-                  <h3 className="profile-subtitle">{t("ossContributions")}</h3>
+                  <h3 className="profile-subtitle">{t("popularRepos")}</h3>
                   <div className="profile-list">
-                    {ghStats.ossContributions.map((org) => (
-                      <div key={org.org} className="profile-list-row">
-                        <span>{org.org}</span>
+                    {ghStats.ossContributions.map((repo) => (
+                      <a key={repo.repo} className="profile-list-row profile-repo-row" href={repo.url} target="_blank" rel="noreferrer">
+                        <span>
+                          {repo.repo}
+                          <small>{repo.isOpenCqut ? "OpenCQUT" : `${repo.stars.toLocaleString()} ${t("stars")}`}</small>
+                        </span>
                         <div className="profile-inline-meta">
-                          <span>{org.prs} PRs</span>
-                          <span>{org.issues} Issues</span>
+                          {repo.prs > 0 && <span>{repo.prs} PRs</span>}
+                          {repo.issues > 0 && <span>{repo.issues} Issues</span>}
+                          {repo.commits > 0 && <span>{repo.commits} Commits</span>}
                         </div>
-                      </div>
+                      </a>
                     ))}
                   </div>
                 </div>

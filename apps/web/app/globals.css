@@ -1063,6 +1063,23 @@ img {
   overflow-wrap: anywhere;
 }
 
+.profile-repo-row {
+  color: inherit;
+  text-decoration: none;
+}
+
+.profile-repo-row:hover {
+  color: var(--text-100);
+}
+
+.profile-repo-row small {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-500);
+  font-size: 0.76rem;
+  font-weight: 500;
+}
+
 .profile-stat-row {
   display: flex;
   gap: 24px;
