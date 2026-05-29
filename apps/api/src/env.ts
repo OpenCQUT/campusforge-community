@@ -5,6 +5,7 @@ const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   API_PORT: z.coerce.number().int().positive().default(4000),
   CORS_ORIGIN: z.string().default("http://localhost:3000"),
+  REPOSITORY_MODE: z.enum(["mock", "db"]).default("mock"),
 });
 
 export type ApiEnv = z.infer<typeof envSchema>;

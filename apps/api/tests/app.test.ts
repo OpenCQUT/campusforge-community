@@ -5,6 +5,7 @@ const env = {
   NODE_ENV: "test" as const,
   API_PORT: 4000,
   CORS_ORIGIN: "http://localhost:3000",
+  REPOSITORY_MODE: "mock" as const,
 };
 
 describe("api", () => {

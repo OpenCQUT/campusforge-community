@@ -3,6 +3,8 @@ import helmet from "@fastify/helmet";
 import rateLimit from "@fastify/rate-limit";
 import Fastify from "fastify";
 import type { ApiEnv } from "./env";
+import { MockApplicationRepository } from "./repositories/mock-application-repository";
+import { createApplicationRoutes } from "./routes/applications";
 import { registerHealthRoutes } from "./routes/health";
 
 export async function buildApp(env: ApiEnv) {
@@ -20,7 +22,12 @@ export async function buildApp(env: ApiEnv) {
     timeWindow: "1 minute",
   });
 
+  const applicationRepository = new MockApplicationRepository();
+
   await app.register(registerHealthRoutes, { prefix: "/v1" });
+  await app.register(createApplicationRoutes(applicationRepository), {
+    prefix: "/v1",
+  });
 
   return app;
 }

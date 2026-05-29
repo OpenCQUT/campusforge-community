@@ -29,6 +29,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@campusforge/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@fastify/cors':
         specifier: ^11.0.0
         version: 11.2.0
