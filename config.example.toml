@@ -5,6 +5,8 @@ password = "123456"
 [github]
 org = "OpenCQUT"
 token = ""
+client_id = ""
+client_secret = ""
 
 [app]
 debug = true

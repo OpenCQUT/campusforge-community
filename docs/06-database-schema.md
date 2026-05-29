@@ -12,6 +12,9 @@
 - `CourseEnrollment`
 - `PolicyDocument`
 - `AuditLog`
+- `IssueClaim`
+- `GitHubProfileCache`
+- `GitHubConnection`
 
 ## 邀请状态
 
@@ -39,3 +42,8 @@ DRAFT -> SUBMITTED -> VERIFYING -> UNDER_REVIEW -> APPROVED / REJECTED / NEEDS_I
 - `Course.status`
 - `PolicyDocument.status`
 - `AuditLog.createdAt`
+- `IssueClaim(owner, repo, number)`
+- `GitHubProfileCache.username`
+- `GitHubProfileCache.fetchedAt`
+- `GitHubConnection.email`
+- `GitHubConnection.githubId`

@@ -88,6 +88,9 @@ Response:
       "updatedAt": "2026-05-02T00:00:00Z",
       "labels": [{ "name": "good first issue", "color": "7057ff" }],
       "assignees": [],
+      "claimedBy": "octocat",
+      "claimedAt": "2026-05-02T10:00:00Z",
+      "remoteAssigned": false,
       "author": "octocat"
     }
   ]
@@ -98,7 +101,24 @@ Response:
 
 认领 GitHub Issue。需要已登录会话；未登录返回 `401`。
 服务端读取 `[github].token` 并调用 GitHub assignees API。
-Token 需要具备目标仓库 Issue 写权限；未配置 Token 时接口返回 `202`，前端仍会把任务加入本地个人任务列表，但不会同步 GitHub 远端 assign。
+Token 需要具备目标仓库 Issue 写权限；未配置 Token 或远端 assign 失败时接口返回 `202`，服务端仍会记录认领状态，其他成员在 Issue 列表中也能看到该任务已被认领。
+
+Request body:
+
+```json
+{
+  "owner": "OpenCQUT",
+  "repo": "campusforge-community",
+  "number": 12,
+  "title": "Fix profile layout",
+  "url": "https://github.com/OpenCQUT/campusforge-community/issues/12",
+  "assignee": "github-user"
+}
+```
+
+### `DELETE /api/github/issues/claim`
+
+取消 GitHub Issue 的平台认领记录。需要已登录会话；管理员可取消任意认领，本人可取消自己的认领。
 
 Request body:
 
@@ -115,7 +135,38 @@ Response:
 
 ```json
 {
-  "remoteAssigned": true
+  "cancelled": true
+}
+```
+
+### `GET /api/github/profile?username=:username`
+
+获取 GitHub 个人贡献统计。服务端缓存同一用户名的统计数据 30 分钟，缓存未过期时不再访问 GitHub API。
+需要已登录会话；未登录返回 `401`。
+
+### `GET /api/github/connection`
+
+读取当前登录用户已验证绑定的 GitHub 账号。需要先通过 OAuth 连接，不能手动填写他人的 username。
+
+### `DELETE /api/github/connection`
+
+解绑当前登录用户的 GitHub 账号。
+
+### `GET /api/github/oauth/start`
+
+开始 GitHub OAuth 绑定流程。需要在 `config.toml` 的 `[github]` 中配置 `client_id` 和 `client_secret`。
+
+### `GET /api/github/oauth/callback`
+
+GitHub OAuth 回调地址。验证 `state` 后换取 GitHub 用户身份，并保存已验证的 GitHub 账号关联。
+
+Response:
+
+```json
+{
+  "remoteAssigned": true,
+  "claimedBy": "github-user",
+  "claimedAt": "2026-05-02T10:00:00Z"
 }
 ```
 

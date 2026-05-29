@@ -201,3 +201,39 @@ model AuditLog {
 
   @@index([createdAt])
 }
+
+// ─── GitHub Integration State ───────────────────────────────────────────────
+
+model IssueClaim {
+  id              String   @id @default(cuid())
+  owner           String
+  repo            String
+  number          Int
+  title           String
+  url             String
+  claimedBy       String
+  claimedByEmail  String?
+  claimedAt       DateTime @default(now())
+  remoteAssigned  Boolean  @default(false)
+
+  @@unique([owner, repo, number])
+  @@index([claimedBy])
+  @@index([claimedAt])
+}
+
+model GitHubProfileCache {
+  username  String   @id
+  fetchedAt DateTime
+  stats     Json
+}
+
+model GitHubConnection {
+  email       String   @id
+  githubId    Int      @unique
+  username    String
+  avatarUrl   String
+  profileUrl  String
+  connectedAt DateTime @default(now())
+
+  @@index([username])
+}

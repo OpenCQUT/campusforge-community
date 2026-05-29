@@ -36,3 +36,7 @@ export function saveClaimedIssueTask(task: ClaimedIssueTask) {
   const next = [task, ...tasks.filter((item) => item.id !== task.id)];
   writeTasks(next);
 }
+
+export function deleteClaimedIssueTask(id: string) {
+  writeTasks(readTasks().filter((item) => item.id !== id));
+}

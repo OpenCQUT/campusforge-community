@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { loadServerConfig } from "@/lib/server-config";
+import { getIssueClaims } from "@/lib/issue-claim-store";
 
 interface GitHubSearchIssue {
   id: number;
@@ -56,9 +57,16 @@ export async function GET(request: Request) {
   }
 
   const data = await response.json() as { items?: GitHubSearchIssue[] };
+  const claims = new Map(
+    getIssueClaims().map((claim) => [
+      `${claim.owner}/${claim.repo}#${claim.number}`.toLowerCase(),
+      claim,
+    ]),
+  );
   const items = (data.items ?? []).map((issue) => {
     const fullName = repoFullName(issue.repository_url);
     const [owner = org, repo = fullName] = fullName.split("/");
+    const claim = claims.get(`${owner}/${repo}#${issue.number}`.toLowerCase());
     return {
       id: String(issue.id),
       owner,
@@ -72,6 +80,9 @@ export async function GET(request: Request) {
       updatedAt: issue.updated_at,
       labels: issue.labels.map((label) => ({ name: label.name, color: label.color })),
       assignees: issue.assignees.map((assignee) => assignee.login),
+      claimedBy: claim?.claimedBy ?? null,
+      claimedAt: claim?.claimedAt ?? null,
+      remoteAssigned: claim?.remoteAssigned ?? issue.assignees.length > 0,
       author: issue.user.login,
     };
   });

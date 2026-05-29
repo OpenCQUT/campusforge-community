@@ -184,6 +184,70 @@ paths:
           description: Login required
         "502":
           description: GitHub assignment failed
+    delete:
+      summary: Cancel a local GitHub issue claim
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClaimGitHubIssue"
+      responses:
+        "200":
+          description: Claim cancelled
+        "400":
+          description: Invalid claim request
+        "401":
+          description: Login required
+        "403":
+          description: Only the claimant or an admin can cancel the claim
+  /github/profile:
+    get:
+      summary: Get cached GitHub profile contribution stats
+      parameters:
+        - in: query
+          name: username
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Cached or freshly fetched profile statistics
+        "400":
+          description: Missing username
+        "401":
+          description: Login required
+        "502":
+          description: GitHub profile request failed
+  /github/connection:
+    get:
+      summary: Get the current user's verified GitHub connection
+      responses:
+        "200":
+          description: GitHub connection, or null when not connected
+        "401":
+          description: Login required
+    delete:
+      summary: Disconnect the current user's GitHub account
+      responses:
+        "200":
+          description: GitHub connection removed
+        "401":
+          description: Login required
+  /github/oauth/start:
+    get:
+      summary: Start GitHub OAuth account connection
+      responses:
+        "307":
+          description: Redirect to GitHub authorization
+        "401":
+          description: Login required
+  /github/oauth/callback:
+    get:
+      summary: Complete GitHub OAuth account connection
+      responses:
+        "307":
+          description: Redirect back to profile after connection
 components:
   schemas:
     CreateApplication:
@@ -283,6 +347,15 @@ components:
           type: array
           items:
             type: string
+        claimedBy:
+          type: string
+          nullable: true
+        claimedAt:
+          type: string
+          format: date-time
+          nullable: true
+        remoteAssigned:
+          type: boolean
         author:
           type: string
     ClaimGitHubIssue:
@@ -295,6 +368,10 @@ components:
           type: string
         number:
           type: integer
+        title:
+          type: string
+        url:
+          type: string
         assignee:
           type: string
     ClaimGitHubIssueResult:
@@ -302,5 +379,10 @@ components:
       properties:
         remoteAssigned:
           type: boolean
+        claimedBy:
+          type: string
+        claimedAt:
+          type: string
+          format: date-time
         reason:
           type: string

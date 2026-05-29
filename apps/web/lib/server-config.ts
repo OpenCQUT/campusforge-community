@@ -9,6 +9,8 @@ interface ServerConfig {
   github: {
     org: string;
     token: string;
+    clientId: string;
+    clientSecret: string;
   };
   app: {
     debug: boolean;
@@ -26,6 +28,8 @@ const DEFAULT_CONFIG: ServerConfig = {
   github: {
     org: "OpenCQUT",
     token: "",
+    clientId: "",
+    clientSecret: "",
   },
   app: {
     debug: false,
@@ -137,6 +141,8 @@ export function loadServerConfig(): ServerConfig {
         github: {
           org: asString(parsed.github?.org).trim() || DEFAULT_CONFIG.github.org,
           token: asString(parsed.github?.token).trim(),
+          clientId: asString(parsed.github?.client_id).trim(),
+          clientSecret: asString(parsed.github?.client_secret).trim(),
         },
         app: {
           debug: asBoolean(parsed.app?.debug),

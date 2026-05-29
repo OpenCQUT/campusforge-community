@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { saveClaimedIssueTask } from "@/lib/issue-task-store";
+import { deleteClaimedIssueTask, saveClaimedIssueTask } from "@/lib/issue-task-store";
+import type { GitHubConnection } from "@/lib/github-connection-store";
 
 interface IssueItem {
   id: string;
@@ -15,12 +16,16 @@ interface IssueItem {
   updatedAt: string;
   labels: { name: string; color: string }[];
   assignees: string[];
+  claimedBy: string | null;
+  claimedAt: string | null;
+  remoteAssigned: boolean;
   author: string;
 }
 
-function getGitHubUsername(): string {
-  if (typeof window === "undefined") return "";
-  return localStorage.getItem("cf_github") ?? "";
+function getSessionRole(): string {
+  if (typeof document === "undefined") return "";
+  const match = document.cookie.match(/cf_session=(\w+)/);
+  return match?.[1] ?? "";
 }
 
 export default function IssuesPage() {
@@ -30,7 +35,9 @@ export default function IssuesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [claiming, setClaiming] = useState<string | null>(null);
+  const [cancelling, setCancelling] = useState<string | null>(null);
   const [claimedIds, setClaimedIds] = useState<Set<string>>(() => new Set());
+  const [githubConnection, setGitHubConnection] = useState<GitHubConnection | null>(null);
   const [notice, setNotice] = useState("");
 
   useEffect(() => {
@@ -59,9 +66,23 @@ export default function IssuesPage() {
     };
   }, [t]);
 
+  useEffect(() => {
+    async function loadConnection() {
+      try {
+        const response = await fetch("/api/github/connection");
+        if (!response.ok) return;
+        const data = await response.json() as { connection: GitHubConnection | null };
+        setGitHubConnection(data.connection);
+      } catch {
+        setGitHubConnection(null);
+      }
+    }
+
+    loadConnection();
+  }, []);
+
   async function claimIssue(issue: IssueItem) {
-    const username = getGitHubUsername();
-    if (!username) {
+    if (!githubConnection) {
       setNotice(t("connectGitHubFirst"));
       return;
     }
@@ -76,11 +97,19 @@ export default function IssuesPage() {
           owner: issue.owner,
           repo: issue.repo,
           number: issue.number,
-          assignee: username,
+          title: issue.title,
+          url: issue.url,
+          assignee: githubConnection.username,
         }),
       });
-      const data = await response.json() as { remoteAssigned?: boolean; reason?: string };
-      if (!response.ok) throw new Error(data.reason ?? "failed");
+      const data = await response.json() as {
+        remoteAssigned?: boolean;
+        claimedBy?: string;
+        claimedAt?: string;
+        alreadyClaimed?: boolean;
+        reason?: string;
+      };
+      if (!response.ok && !data.alreadyClaimed) throw new Error(data.reason ?? "failed");
 
       saveClaimedIssueTask({
         id: issue.id,
@@ -89,15 +118,60 @@ export default function IssuesPage() {
         number: issue.number,
         title: issue.title,
         url: issue.url,
-        claimedAt: new Date().toISOString(),
+        claimedAt: data.claimedAt ?? new Date().toISOString(),
         remoteAssigned: data.remoteAssigned === true,
       });
       setClaimedIds((prev) => new Set(prev).add(issue.id));
-      setNotice(data.remoteAssigned ? t("claimSuccess") : t("claimLocalOnly"));
+      setItems((prev) => prev.map((item) => item.id === issue.id
+        ? {
+            ...item,
+            claimedBy: data.claimedBy ?? githubConnection.username,
+            claimedAt: data.claimedAt ?? new Date().toISOString(),
+            remoteAssigned: data.remoteAssigned === true,
+          }
+        : item));
+      setNotice(data.alreadyClaimed ? t("alreadyClaimed") : data.remoteAssigned ? t("claimSuccess") : t("claimLocalOnly"));
     } catch {
       setNotice(t("claimFailed"));
     } finally {
       setClaiming(null);
+    }
+  }
+
+  async function cancelClaim(issue: IssueItem) {
+    setCancelling(issue.id);
+    setNotice("");
+    try {
+      const response = await fetch("/api/github/issues/claim", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          owner: issue.owner,
+          repo: issue.repo,
+          number: issue.number,
+          assignee: githubConnection?.username,
+        }),
+      });
+      if (!response.ok) throw new Error("failed");
+      deleteClaimedIssueTask(issue.id);
+      setClaimedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(issue.id);
+        return next;
+      });
+      setItems((prev) => prev.map((item) => item.id === issue.id
+        ? {
+            ...item,
+            claimedBy: null,
+            claimedAt: null,
+            remoteAssigned: item.assignees.length > 0,
+          }
+        : item));
+      setNotice(t("cancelSuccess"));
+    } catch {
+      setNotice(t("cancelFailed"));
+    } finally {
+      setCancelling(null);
     }
   }
 
@@ -120,7 +194,10 @@ export default function IssuesPage() {
         ) : (
           items.map((issue) => {
             const isClaimed = claimedIds.has(issue.id);
-            const hasAssignee = issue.assignees.length > 0;
+            const isServerClaimed = Boolean(issue.claimedBy);
+            const hasRemoteAssignee = issue.assignees.length > 0;
+            const hasAssignee = hasRemoteAssignee || isServerClaimed;
+            const canCancelClaim = isServerClaimed && (getSessionRole() === "admin" || issue.claimedBy === githubConnection?.username);
             return (
               <article key={issue.id} className="glass-card issue-card">
                 <div className="issue-card-main">
@@ -144,15 +221,25 @@ export default function IssuesPage() {
                 </div>
                 <div className="issue-card-side">
                   <span className={`tag ${hasAssignee ? "tag-blue" : "tag-success"}`}>
-                    {hasAssignee ? t("assigned") : t("unassigned")}
+                    {hasRemoteAssignee ? t("assigned") : isServerClaimed ? t("claimedStatus") : t("unassigned")}
                   </span>
-                  <button
-                    className="btn btn-primary btn-sm"
-                    onClick={() => claimIssue(issue)}
-                    disabled={claiming === issue.id || isClaimed}
-                  >
-                    {isClaimed ? t("claimed") : claiming === issue.id ? t("claiming") : t("claim")}
-                  </button>
+                  {canCancelClaim ? (
+                    <button
+                      className="btn btn-ghost btn-sm"
+                      onClick={() => cancelClaim(issue)}
+                      disabled={cancelling === issue.id}
+                    >
+                      {cancelling === issue.id ? t("cancelling") : t("cancelClaim")}
+                    </button>
+                  ) : (
+                    <button
+                      className="btn btn-primary btn-sm"
+                      onClick={() => claimIssue(issue)}
+                      disabled={claiming === issue.id || isClaimed || isServerClaimed}
+                    >
+                      {isClaimed || isServerClaimed ? t("claimed") : claiming === issue.id ? t("claiming") : t("claim")}
+                    </button>
+                  )}
                 </div>
               </article>
             );
