@@ -1,18 +1,34 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
+
+const ACCOUNTS: Record<string, { password: string; role: string }> = {
+  "test@admin.edu": { password: "123456", role: "admin" },
+};
 
 export default function LoginPage() {
   const t = useTranslations("login");
   const tc = useTranslations("common");
   const router = useRouter();
 
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
   function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    // Demo: set a session cookie and redirect to resources
-    document.cookie = "cf_session=demo; path=/; max-age=86400";
-    router.push("/resources");
+    setError("");
+
+    const account = ACCOUNTS[email.trim().toLowerCase()];
+    if (!account || account.password !== password) {
+      setError(t("invalidCredentials"));
+      return;
+    }
+
+    document.cookie = `cf_session=${account.role}; path=/; max-age=86400`;
+    router.push(account.role === "admin" ? "/admin" : "/resources");
   }
 
   return (
@@ -40,20 +56,44 @@ export default function LoginPage() {
             {t("subtitle")}
           </p>
 
-          <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          <form
+            onSubmit={handleLogin}
+            style={{ display: "flex", flexDirection: "column", gap: 20 }}
+          >
             <div className="field">
               <label htmlFor="email">{t("emailLabel")}</label>
               <input
                 id="email"
                 type="email"
                 placeholder={t("emailPlaceholder")}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
               />
             </div>
             <div className="field">
               <label htmlFor="password">{t("passwordLabel")}</label>
-              <input id="password" type="password" placeholder="••••••••" />
+              <input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
             </div>
-            <button type="submit" className="btn btn-primary" style={{ width: "100%" }}>
+
+            {error && (
+              <p style={{ color: "var(--danger)", fontSize: "0.85rem", margin: 0 }}>
+                {error}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              className="btn btn-primary"
+              style={{ width: "100%" }}
+            >
               {tc("login")}
             </button>
           </form>

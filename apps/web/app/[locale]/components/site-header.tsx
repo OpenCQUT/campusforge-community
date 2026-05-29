@@ -3,9 +3,10 @@
 import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 
-function useIsLoggedIn(): boolean {
-  if (typeof document === "undefined") return false;
-  return document.cookie.includes("cf_session=");
+function getSessionRole(): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(/cf_session=(\w+)/);
+  return match?.[1] ?? null;
 }
 
 export function SiteHeader() {
@@ -13,23 +14,33 @@ export function SiteHeader() {
   const t = useTranslations();
   const locale = useLocale();
   const router = useRouter();
-  const isLoggedIn = useIsLoggedIn();
+  const role = getSessionRole();
+  const isLoggedIn = role !== null;
+  const isAdmin = role === "admin";
 
   const publicNav = [
     { href: "/apply", label: t("nav.apply") },
     { href: "/status", label: t("nav.status") },
   ];
 
-  const protectedNav = [
+  const memberNav = [
     { href: "/resources", label: t("nav.resources") },
     { href: "/courses", label: t("nav.courses") },
     { href: "/policies", label: t("nav.policies") },
-    { href: "/admin", label: t("nav.admin") },
   ];
 
-  const navItems = isLoggedIn
-    ? [...protectedNav]
-    : [...publicNav];
+  const adminNav = [
+    { href: "/admin", label: t("nav.admin") },
+    { href: "/resources", label: t("nav.resources") },
+    { href: "/courses", label: t("nav.courses") },
+    { href: "/policies", label: t("nav.policies") },
+  ];
+
+  const navItems = !isLoggedIn
+    ? publicNav
+    : isAdmin
+      ? adminNav
+      : memberNav;
 
   function switchLocale() {
     const next = locale === "en" ? "zh" : "en";
@@ -43,7 +54,7 @@ export function SiteHeader() {
 
   return (
     <header className="site-header">
-      <Link href={isLoggedIn ? "/resources" : "/"} className="site-logo">
+      <Link href={isLoggedIn ? (isAdmin ? "/admin" : "/resources") : "/"} className="site-logo">
         CampusForge
       </Link>
       <nav className="site-nav">

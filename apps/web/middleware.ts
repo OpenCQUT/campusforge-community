@@ -5,28 +5,35 @@ import { routing } from "./i18n/routing";
 const handleI18n = createMiddleware(routing);
 
 const PUBLIC_PATHS = ["/", "/apply", "/status"];
+const ADMIN_PATHS = ["/admin"];
 
-function isPublicPath(pathname: string): boolean {
-  // pathname comes in as /en/apply, /zh/status, etc.
-  // Strip the locale prefix to get the bare path
-  const bare = pathname.replace(/^\/(en|zh)(\/|$)/, "/") || "/";
-  return PUBLIC_PATHS.some((p) => bare === p || bare.startsWith(p + "/"));
+function stripLocale(pathname: string): string {
+  return pathname.replace(/^\/(en|zh)(\/|$)/, "/") || "/";
+}
+
+function matchesAny(pathname: string, paths: string[]): boolean {
+  return paths.some((p) => pathname === p || pathname.startsWith(p + "/"));
 }
 
 export default function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const bare = stripLocale(pathname);
+  const locale = pathname.match(/^\/(en|zh)/)?.[1] ?? routing.defaultLocale;
 
-  // Let next-intl handle locale routing first for public paths
-  if (isPublicPath(pathname)) {
+  // Public paths — no auth needed
+  if (matchesAny(bare, PUBLIC_PATHS)) {
     return handleI18n(request);
   }
 
-  // Protected path — check session cookie
+  // Must be logged in from here
   const session = request.cookies.get("cf_session");
   if (!session) {
-    // Redirect to the login page (root) preserving locale
-    const locale = pathname.match(/^\/(en|zh)/)?.[1] ?? routing.defaultLocale;
     return NextResponse.redirect(new URL(`/${locale}`, request.url));
+  }
+
+  // Admin-only paths — require admin role
+  if (matchesAny(bare, ADMIN_PATHS) && session.value !== "admin") {
+    return NextResponse.redirect(new URL(`/${locale}/resources`, request.url));
   }
 
   return handleI18n(request);

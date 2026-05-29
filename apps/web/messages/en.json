@@ -30,7 +30,8 @@
     "noAccount": "Don't have an account?",
     "applyLink": "Request an invitation",
     "checkStatus": "Already applied?",
-    "statusLink": "Check your application status"
+    "statusLink": "Check your application status",
+    "invalidCredentials": "Invalid email or password."
   },
   "home": {
     "eyebrow": "School Open-Source Community",

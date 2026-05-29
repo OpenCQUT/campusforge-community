@@ -30,7 +30,8 @@
     "noAccount": "还没有账号？",
     "applyLink": "申请邀请",
     "checkStatus": "已经申请了？",
-    "statusLink": "查看申请状态"
+    "statusLink": "查看申请状态",
+    "invalidCredentials": "邮箱或密码错误。"
   },
   "home": {
     "eyebrow": "校园开源社区",
