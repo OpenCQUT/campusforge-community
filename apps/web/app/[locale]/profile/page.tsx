@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { getCourseProgress, type CourseProgress } from "@/lib/learning-store";
 
 import { config } from "@/lib/config";
+
 
 
 // ─── Session helpers ────────────────────────────────────────────────────────
@@ -67,13 +68,31 @@ const LEVEL_COLORS = [
 ];
 
 function ContributionGraph({ weeks }: { weeks: ContributionWeek[] }) {
-  const cellSize = 12;
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const [containerWidth, setContainerWidth] = React.useState(0);
+
+  React.useEffect(() => {
+    if (containerRef.current) {
+      setContainerWidth(containerRef.current.offsetWidth);
+    }
+    const handleResize = () => {
+      if (containerRef.current) {
+        setContainerWidth(containerRef.current.offsetWidth);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const gap = 2;
+  const minCellSize = 8;
+  const maxCellSize = 14;
+  const cellSize = Math.max(minCellSize, Math.min(maxCellSize, Math.floor((containerWidth - (weeks.length - 1) * gap) / weeks.length)));
   const width = weeks.length * (cellSize + gap);
   const height = 7 * (cellSize + gap);
 
   return (
-    <div style={{ overflowX: "auto", marginBottom: 16 }}>
+    <div ref={containerRef} style={{ width: "100%", overflowX: "auto", marginBottom: 16 }}>
       <svg width={width} height={height} style={{ display: "block" }}>
         {weeks.map((week, wi) =>
           week.days.map((day, di) => (
@@ -94,6 +113,7 @@ function ContributionGraph({ weeks }: { weeks: ContributionWeek[] }) {
     </div>
   );
 }
+
 
 
 // ─── Component ──────────────────────────────────────────────────────────────
