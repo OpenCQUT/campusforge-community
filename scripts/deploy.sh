@@ -160,7 +160,7 @@ if [ ! -f "$ENV_FILE" ]; then
 NODE_ENV=production
 WEB_PORT=$WEB_PORT
 API_PORT=$API_PORT
-NEXT_PUBLIC_API_BASE_URL=https://$DOMAIN/api/v1
+NEXT_PUBLIC_API_BASE_URL=https://$DOMAIN/v1
 NEXT_PUBLIC_ADMIN_EMAIL=admin@$DOMAIN
 CAMPUSFORGE_SESSION_SECRET=$SESSION_SECRET
 NEXT_PUBLIC_DEBUG=false
@@ -281,8 +281,8 @@ server {
 
   client_max_body_size 2m;
 
-  location /api/ {
-    proxy_pass http://campusforge_api/;
+  location /v1/ {
+    proxy_pass http://campusforge_api;
     proxy_http_version 1.1;
     proxy_set_header Host \$host;
     proxy_set_header X-Real-IP \$remote_addr;
