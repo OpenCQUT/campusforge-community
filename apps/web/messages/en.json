@@ -64,6 +64,11 @@
     "departmentPlaceholder": "Computer Science",
     "reason": "Why do you want to join?",
     "reasonPlaceholder": "Tell us about your interests and what you hope to contribute...",
+    "verificationCode": "Email Verification Code",
+    "verificationPlaceholder": "6-digit code",
+    "sendCode": "Send Code",
+    "sendingCode": "Sending...",
+    "verificationSent": "Verification code sent. Check your inbox.",
     "whatNext": "What happens next?",
     "whatNextDesc": "After you submit your application, an admin will review your request. You can check the status at any time.",
     "step1": "Application submitted",
@@ -76,6 +81,10 @@
     "checkStatus": "Check Application Status",
     "submitAnother": "Submit Another",
     "fieldRequired": "This field is required.",
+    "verificationRequired": "Enter the email verification code.",
+    "verificationInvalid": "The verification code is invalid or expired.",
+    "verificationSendFailed": "Unable to send the code. Try again later.",
+    "submitting": "Submitting...",
     "reasonTooShort": "Please write at least 10 characters.",
     "emailInvalid": "Please enter a valid email address.",
     "duplicateEmail": "An application already exists for this email."
@@ -266,6 +275,13 @@
     "assignedOnGitHub": "Assigned on GitHub",
     "localTask": "Local Task",
     "loading": "Loading..."
+    ,"security": "Security",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "changePassword": "Change Password",
+    "saving": "Saving...",
+    "passwordChanged": "Password changed.",
+    "passwordChangeFailed": "Unable to change password. Check the current password and new password length."
   },
 
   "statusLabel": {

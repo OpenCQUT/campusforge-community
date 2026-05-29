@@ -46,6 +46,12 @@
 - JSON 消息文件结构清晰，便于翻译管理。
 - 支持英文（en）和中文（zh）。
 
+## 邮件：SMTP + nodemailer
+
+真实邮箱验证码通过 SMTP 发送，运行时配置来自 `config.toml` 的 `[email]` 和
+`[verification]`。本地开发可使用 `mode = "log"`，生产环境应使用 `mode = "smtp"` 并通过
+服务器配置文件或 secret manager 注入 SMTP 凭证。
+
 ## Monorepo：pnpm workspace + Turborepo
 
 Monorepo 结构便于共享：

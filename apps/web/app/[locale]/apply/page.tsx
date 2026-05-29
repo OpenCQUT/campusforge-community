@@ -14,8 +14,12 @@ export default function ApplyPage() {
   const [studentId, setStudentId] = useState("");
   const [department, setDepartment] = useState("");
   const [reason, setReason] = useState("");
+  const [verificationCode, setVerificationCode] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [isSendingCode, setIsSendingCode] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [verificationMessage, setVerificationMessage] = useState("");
 
   function validate(): boolean {
     const e: Record<string, string> = {};
@@ -24,6 +28,7 @@ export default function ApplyPage() {
     } else if (!validateEmail(email).ok) {
       e.email = t("emailInvalid");
     }
+    if (!verificationCode.trim()) e.verificationCode = t("verificationRequired");
     if (!studentId.trim()) e.studentId = t("fieldRequired");
     if (!department.trim()) e.department = t("fieldRequired");
     if (!reason.trim()) e.reason = t("fieldRequired");
@@ -32,9 +37,62 @@ export default function ApplyPage() {
     return Object.keys(e).length === 0;
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSendCode() {
+    const trimmedEmail = email.trim().toLowerCase();
+    setVerificationMessage("");
+    setErrors((current) => ({ ...current, email: "", verificationCode: "" }));
+
+    if (!validateEmail(trimmedEmail).ok) {
+      setErrors((current) => ({ ...current, email: t("emailInvalid") }));
+      return;
+    }
+
+    setIsSendingCode(true);
+    const response = await fetch("/api/email-verification/request", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email: trimmedEmail }),
+    });
+    setIsSendingCode(false);
+
+    if (!response.ok) {
+      setErrors((current) => ({ ...current, verificationCode: t("verificationSendFailed") }));
+      return;
+    }
+
+    setVerificationMessage(t("verificationSent"));
+  }
+
+  async function confirmVerification(): Promise<boolean> {
+    const response = await fetch("/api/email-verification/confirm", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        email: email.trim().toLowerCase(),
+        code: verificationCode.trim(),
+      }),
+    });
+
+    if (!response.ok) {
+      setErrors((current) => ({
+        ...current,
+        verificationCode: t("verificationInvalid"),
+      }));
+      return false;
+    }
+
+    return true;
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!validate()) return;
+    setIsSubmitting(true);
+    const verified = await confirmVerification();
+    if (!verified) {
+      setIsSubmitting(false);
+      return;
+    }
     try {
       addApplication({
         email: email.trim(),
@@ -49,11 +107,18 @@ export default function ApplyPage() {
       }
       throw error;
     }
+    setIsSubmitting(false);
     setSubmitted(true);
   }
 
   function handleReset() {
-    setEmail(""); setStudentId(""); setDepartment(""); setReason(""); setErrors({});
+    setEmail("");
+    setStudentId("");
+    setDepartment("");
+    setReason("");
+    setVerificationCode("");
+    setVerificationMessage("");
+    setErrors({});
   }
 
   if (submitted) {
@@ -107,6 +172,37 @@ export default function ApplyPage() {
                 </div>
               </div>
 
+              <div className="form-row">
+                <div className="field">
+                  <label htmlFor="verification-code">{t("verificationCode")}</label>
+                  <input
+                    id="verification-code"
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={6}
+                    placeholder={t("verificationPlaceholder")}
+                    value={verificationCode}
+                    onChange={(e) => setVerificationCode(e.target.value)}
+                  />
+                  {verificationMessage && (
+                    <span style={{ color: "var(--success)", fontSize: "0.78rem" }}>
+                      {verificationMessage}
+                    </span>
+                  )}
+                  {errors.verificationCode && <FieldError msg={errors.verificationCode} />}
+                </div>
+                <div className="field" style={{ justifyContent: "end" }}>
+                  <button
+                    type="button"
+                    className="btn btn-ghost"
+                    onClick={handleSendCode}
+                    disabled={isSendingCode}
+                  >
+                    {isSendingCode ? t("sendingCode") : t("sendCode")}
+                  </button>
+                </div>
+              </div>
+
               <div className="field">
                 <label htmlFor="department">{t("department")}</label>
                 <input id="department" type="text" placeholder={t("departmentPlaceholder")}
@@ -122,7 +218,9 @@ export default function ApplyPage() {
               </div>
 
               <div className="form-actions">
-                <button type="submit" className="btn btn-primary">{tc("submit")}</button>
+                <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+                  {isSubmitting ? t("submitting") : tc("submit")}
+                </button>
                 <button type="button" className="btn btn-ghost" onClick={handleReset}>{tc("clear")}</button>
               </div>
             </form>

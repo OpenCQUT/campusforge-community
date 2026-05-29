@@ -38,6 +38,7 @@ scripts/deploy.sh \
 - 将证书解压到 `/etc/nginx/ssl/<domain>`。
 - 按服务器现有 `sites-available` / `sites-enabled` 风格生成 Nginx HTTPS 反代配置。
 - 初始化 `/opt/campusforge/.env` 与 `/opt/campusforge/config.toml`，后续部署不会覆盖这两个文件。
+- 默认将运行时数据写入 `/opt/campusforge/data`，应用日志目录预留为 `/opt/campusforge/logs`。
 
 首次部署后请登录服务器修改 `/opt/campusforge/config.toml` 中的管理员邮箱、管理员密码和
 GitHub OAuth 配置，然后重新执行部署命令或运行：
@@ -46,6 +47,35 @@ GitHub OAuth 配置，然后重新执行部署命令或运行：
 cd /opt/campusforge/app
 docker compose --env-file /opt/campusforge/.env -f docker-compose.prod.yml up -d --build
 ```
+
+管理员账号支持列表配置。生产环境可以将 `password` 留空，首次登录相关代码路径加载时会在
+`data_dir/admin-password.txt` 生成一个强随机密码：
+
+```toml
+[admin]
+emails = ["admin@example.edu", "maintainer@example.edu"]
+password = ""
+```
+
+如果 `password` 写在 `config.toml` 中，密码由配置文件管理，页面内修改密码会被拒绝。
+如果 `password` 留空，管理员可在个人中心修改运行时密码，修改结果写入
+`data_dir/admin-password.txt`。
+
+邮箱验证码依赖 `config.toml` 的 `[email]` 配置。仓库模板默认保留空 SMTP 字段，生产环境
+需要在服务器上填写真实发件服务：
+
+```toml
+[email]
+mode = "smtp"
+from = "CampusForge <noreply@example.edu>"
+host = "smtp.example.edu"
+port = 587
+secure = false
+user = "smtp-user"
+pass = "smtp-password"
+```
+
+如果 `mode = "smtp"` 但 `host` 或 `from` 为空，验证码接口会返回配置错误，不会假装发送成功。
 
 日常开发时，本地提交并推送到 `main` 后，可以让服务器拉取最新代码并重建容器：
 

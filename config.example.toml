@@ -1,5 +1,7 @@
 [admin]
 email = "test@admin.edu"
+emails = ["test@admin.edu"]
+# Leave password empty in production to generate a strong initial password in data_dir/admin-password.txt.
 password = "123456"
 
 [github]
@@ -11,3 +13,21 @@ client_secret = ""
 [app]
 debug = true
 session_secret = "replace-with-a-long-random-secret"
+
+[storage]
+data_dir = ".campusforge-data"
+log_dir = ".campusforge-logs"
+
+[email]
+# Use "smtp" in production. Use "log" only for local development.
+mode = "log"
+from = "CampusForge <noreply@example.edu>"
+host = ""
+port = 587
+secure = false
+user = ""
+pass = ""
+
+[verification]
+code_ttl_minutes = 10
+resend_cooldown_seconds = 60

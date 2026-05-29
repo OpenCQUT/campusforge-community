@@ -168,6 +168,8 @@ CORS_ORIGIN=https://$DOMAIN,https://www.$DOMAIN
 REPOSITORY_MODE=mock
 CAMPUSFORGE_ENV_FILE=$ENV_FILE
 CAMPUSFORGE_CONFIG_FILE=$CONFIG_FILE
+CAMPUSFORGE_DATA_DIR=$REMOTE_DIR/data
+CAMPUSFORGE_LOG_DIR=$REMOTE_DIR/logs
 ENVEOF
   chmod 600 "$ENV_FILE"
 fi
@@ -176,8 +178,8 @@ if [ ! -f "$CONFIG_FILE" ]; then
   SESSION_SECRET="$(grep '^CAMPUSFORGE_SESSION_SECRET=' "$ENV_FILE" | cut -d= -f2-)"
   cat > "$CONFIG_FILE" <<TOMLEOF
 [admin]
-email = "admin@$DOMAIN"
-password = "change-me-before-login"
+emails = ["admin@$DOMAIN"]
+password = ""
 
 [github]
 org = "OpenCQUT"
@@ -188,6 +190,23 @@ client_secret = ""
 [app]
 debug = false
 session_secret = "$SESSION_SECRET"
+
+[storage]
+data_dir = "$REMOTE_DIR/data"
+log_dir = "$REMOTE_DIR/logs"
+
+[email]
+mode = "smtp"
+from = ""
+host = ""
+port = 587
+secure = false
+user = ""
+pass = ""
+
+[verification]
+code_ttl_minutes = 10
+resend_cooldown_seconds = 60
 TOMLEOF
   chmod 600 "$CONFIG_FILE"
 fi

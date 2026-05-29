@@ -107,6 +107,9 @@ export default function ProfilePage() {
   const [ghStats, setGhStats] = useState<GitHubStats | null>(null);
   const [ghLoading, setGhLoading] = useState(false);
   const [ghError, setGhError] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [passwordStatus, setPasswordStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
 
   // Learning progress state
   const [courses, setCourses] = useState<CourseProgress[]>([]);
@@ -162,6 +165,25 @@ export default function ProfilePage() {
 
   function handleGitHubConnect() {
     window.location.assign("/api/github/oauth/start");
+  }
+
+  async function handlePasswordChange(e: React.FormEvent) {
+    e.preventDefault();
+    setPasswordStatus("saving");
+    const response = await fetch("/api/admin/password", {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ currentPassword, newPassword }),
+    });
+
+    if (!response.ok) {
+      setPasswordStatus("error");
+      return;
+    }
+
+    setCurrentPassword("");
+    setNewPassword("");
+    setPasswordStatus("saved");
   }
 
   const startedCount = courses.length;
@@ -271,6 +293,48 @@ export default function ProfilePage() {
         </section>
 
         <aside className="profile-sidebar">
+          {role === "admin" && (
+            <div className="glass-card profile-card">
+              <h2>{t("security")}</h2>
+              <form onSubmit={handlePasswordChange} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                <div className="field">
+                  <label htmlFor="current-password">{t("currentPassword")}</label>
+                  <input
+                    id="current-password"
+                    type="password"
+                    value={currentPassword}
+                    onChange={(event) => setCurrentPassword(event.target.value)}
+                    required
+                  />
+                </div>
+                <div className="field">
+                  <label htmlFor="new-password">{t("newPassword")}</label>
+                  <input
+                    id="new-password"
+                    type="password"
+                    value={newPassword}
+                    onChange={(event) => setNewPassword(event.target.value)}
+                    minLength={12}
+                    required
+                  />
+                </div>
+                {passwordStatus === "saved" && (
+                  <p style={{ color: "var(--success)", fontSize: "0.82rem", margin: 0 }}>
+                    {t("passwordChanged")}
+                  </p>
+                )}
+                {passwordStatus === "error" && (
+                  <p style={{ color: "var(--danger)", fontSize: "0.82rem", margin: 0 }}>
+                    {t("passwordChangeFailed")}
+                  </p>
+                )}
+                <button className="btn btn-primary btn-sm" type="submit" disabled={passwordStatus === "saving"}>
+                  {passwordStatus === "saving" ? t("saving") : t("changePassword")}
+                </button>
+              </form>
+            </div>
+          )}
+
           <div className="glass-card profile-card">
             <h2>{t("learning")}</h2>
             {startedCount > 0 ? (

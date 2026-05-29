@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getAdminPassword, isAdminEmail, passwordsMatch } from "@/lib/admin-password";
 import { loadServerConfig } from "@/lib/server-config";
 import { createSessionCookieValue, getSessionSecret } from "@/lib/session";
 
@@ -12,16 +13,16 @@ export async function POST(request: Request) {
   const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
   const password = typeof body.password === "string" ? body.password : "";
   const serverConfig = loadServerConfig();
-  const admin = serverConfig.admin;
+  const adminPassword = getAdminPassword(serverConfig);
 
-  if (!admin.email || !admin.password) {
+  if (serverConfig.admin.emails.length === 0 || !adminPassword) {
     return NextResponse.json(
       { error: "Admin account is not configured." },
       { status: 503 },
     );
   }
 
-  if (email !== admin.email.toLowerCase() || password !== admin.password) {
+  if (!isAdminEmail(serverConfig, email) || !passwordsMatch(password, adminPassword)) {
     return NextResponse.json(
       { error: "Invalid email or password." },
       { status: 401 },
@@ -30,7 +31,7 @@ export async function POST(request: Request) {
 
   const sessionSecret = getSessionSecret(
     serverConfig.app.sessionSecret,
-    serverConfig.admin.password,
+    adminPassword,
   );
   const sessionCookie = await createSessionCookieValue(email, "admin", sessionSecret);
   const response = NextResponse.json({ role: "admin" });

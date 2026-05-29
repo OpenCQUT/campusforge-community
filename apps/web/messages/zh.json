@@ -64,6 +64,11 @@
     "departmentPlaceholder": "计算机科学",
     "reason": "为什么想加入？",
     "reasonPlaceholder": "请介绍你的兴趣和希望做出的贡献……",
+    "verificationCode": "邮箱验证码",
+    "verificationPlaceholder": "6 位验证码",
+    "sendCode": "发送验证码",
+    "sendingCode": "发送中...",
+    "verificationSent": "验证码已发送，请检查邮箱。",
     "whatNext": "接下来会发生什么？",
     "whatNextDesc": "提交申请后，管理员将审核您的请求。您可以随时查看状态。",
     "step1": "申请已提交",
@@ -76,6 +81,10 @@
     "checkStatus": "查看申请状态",
     "submitAnother": "再次提交",
     "fieldRequired": "此项为必填。",
+    "verificationRequired": "请填写邮箱验证码。",
+    "verificationInvalid": "验证码无效或已过期。",
+    "verificationSendFailed": "验证码发送失败，请稍后重试。",
+    "submitting": "提交中...",
     "reasonTooShort": "请至少填写 10 个字符。",
     "emailInvalid": "请输入有效的邮箱地址。",
     "duplicateEmail": "该邮箱已存在申请记录。"
@@ -266,6 +275,13 @@
     "assignedOnGitHub": "GitHub 已分配",
     "localTask": "本地任务",
     "loading": "加载中..."
+    ,"security": "安全",
+    "currentPassword": "当前密码",
+    "newPassword": "新密码",
+    "changePassword": "修改密码",
+    "saving": "保存中...",
+    "passwordChanged": "密码已修改。",
+    "passwordChangeFailed": "密码修改失败，请检查当前密码和新密码长度。"
   },
 
   "statusLabel": {
