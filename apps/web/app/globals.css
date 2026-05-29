@@ -619,6 +619,10 @@ img {
   margin-bottom: 24px;
 }
 
+.fixed-filter-row {
+  flex: none;
+}
+
 /* ─── Hero (Welcome page) ───────────────────────────────────────────────────── */
 
 .hero-section {

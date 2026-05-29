@@ -403,19 +403,19 @@ export default function CoursesPage() {
         <p className="page-subtitle">{t("subtitle")}</p>
       </div>
 
-      <div className="page-scroll-panel">
-        <div className="filter-row">
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat.labelKey}
-              className={`btn btn-sm ${filter === cat.key ? "btn-primary" : "btn-ghost"}`}
-              onClick={() => setFilter(cat.key)}
-            >
-              {t(cat.labelKey)}
-            </button>
-          ))}
-        </div>
+      <div className="filter-row fixed-filter-row">
+        {CATEGORIES.map((cat) => (
+          <button
+            key={cat.labelKey}
+            className={`btn btn-sm ${filter === cat.key ? "btn-primary" : "btn-ghost"}`}
+            onClick={() => setFilter(cat.key)}
+          >
+            {t(cat.labelKey)}
+          </button>
+        ))}
+      </div>
 
+      <div className="page-scroll-panel">
         {filtered.length === 0 ? (
           <div className="glass-card" style={{ padding: 40, textAlign: "center" }}>
             <p style={{ color: "var(--text-500)" }}>{t("noCourses")}</p>
