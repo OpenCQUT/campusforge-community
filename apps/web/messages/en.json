@@ -210,6 +210,7 @@
     "email": "Email",
     "role": "Role",
     "github": "GitHub",
+    "githubOverview": "Commits, pull requests, issues, and organization activity.",
     "githubPlaceholder": "Enter your GitHub username",
     "connect": "Connect",
     "disconnect": "Disconnect",

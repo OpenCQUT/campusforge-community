@@ -210,6 +210,7 @@
     "email": "邮箱",
     "role": "角色",
     "github": "GitHub",
+    "githubOverview": "统计提交、Pull Request、Issue 和组织协作活动。",
     "githubPlaceholder": "输入你的 GitHub 用户名",
     "connect": "绑定",
     "disconnect": "解绑",

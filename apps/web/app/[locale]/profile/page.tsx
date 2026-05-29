@@ -38,6 +38,8 @@ interface ContributionWeek {
 
 interface GitHubStats {
   totalContributions: number;
+  totalPrs: number;
+  totalIssues: number;
   contributionWeeks: ContributionWeek[];
   orgStats: {
     name: string;
@@ -149,9 +151,11 @@ export default function ProfilePage() {
       // Major open source organizations to track
       const majorOrgs = ["facebook", "microsoft", "google", "apache", "vercel", "nextui-org", "shadcn-ui"];
 
-      // Fetch contributions and org stats in parallel
-      const [contribRes, openCqutPrRes, openCqutIssueRes, ...orgResults] = await Promise.all([
+      // Fetch activity totals, contribution graph, and organization stats in parallel.
+      const [contribRes, totalPrRes, totalIssueRes, openCqutPrRes, openCqutIssueRes, ...orgResults] = await Promise.all([
         fetch(`https://github-contributions-api.jogruber.de/v4/${username}?y=last`),
+        fetch(`https://api.github.com/search/issues?q=author:${username}+type:pr&per_page=1`),
+        fetch(`https://api.github.com/search/issues?q=author:${username}+type:issue&per_page=1`),
         fetch(`https://api.github.com/search/issues?q=author:${username}+type:pr+org:OpenCQUT&per_page=1`),
         fetch(`https://api.github.com/search/issues?q=author:${username}+type:issue+org:OpenCQUT&per_page=1`),
         ...majorOrgs.flatMap(org => [
@@ -161,6 +165,8 @@ export default function ProfilePage() {
       ]);
 
       const contribData = contribRes.ok ? await contribRes.json() : { contributions: [], total: { lastYear: 0 } };
+      const totalPrData = totalPrRes.ok ? await totalPrRes.json() : { total_count: 0 };
+      const totalIssueData = totalIssueRes.ok ? await totalIssueRes.json() : { total_count: 0 };
       const openCqutPrData = openCqutPrRes.ok ? await openCqutPrRes.json() : { total_count: 0 };
       const openCqutIssueData = openCqutIssueRes.ok ? await openCqutIssueRes.json() : { total_count: 0 };
 
@@ -196,6 +202,8 @@ export default function ProfilePage() {
 
       setGhStats({
         totalContributions: contribData.total?.lastYear ?? 0,
+        totalPrs: totalPrData.total_count ?? 0,
+        totalIssues: totalIssueData.total_count ?? 0,
         contributionWeeks,
         orgStats: [{
           name: "OpenCQUT",
@@ -291,7 +299,7 @@ export default function ProfilePage() {
           <div className="profile-section-header">
             <div>
               <h2>{t("github")}</h2>
-              <p>{t("contributionGraph")}</p>
+              <p>{t("githubOverview")}</p>
             </div>
             {ghUsername && (
               <button className="btn btn-ghost btn-sm" onClick={handleDisconnect}>{t("disconnect")}</button>
@@ -320,12 +328,14 @@ export default function ProfilePage() {
               {/* Total contributions */}
               <div className="profile-stat-row profile-github-total">
                 <StatBlock label={t("totalContributions")} value={ghStats.totalContributions} />
+                <StatBlock label={t("pullRequests")} value={ghStats.totalPrs} />
+                <StatBlock label={t("issues")} value={ghStats.totalIssues} />
                 {ghStats.orgStats
                   .filter((org) => org.prs > 0 || org.issues > 0)
                   .map((org) => (
                     <React.Fragment key={org.name}>
-                        <StatBlock label={t("pullRequests")} value={org.prs} />
-                        <StatBlock label={t("issues")} value={org.issues} />
+                      <StatBlock label={`${org.name} ${t("pullRequests")}`} value={org.prs} />
+                      <StatBlock label={`${org.name} ${t("issues")}`} value={org.issues} />
                     </React.Fragment>
                   ))}
               </div>
