@@ -109,24 +109,8 @@ export default function ProfilePage() {
   const [ghError, setGhError] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [passwordStatus, setPasswordStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
-  const [serverConfig, setServerConfig] = useState({
-    email: {
-      mode: "log",
-      from: "",
-      host: "",
-      port: 587,
-      secure: false,
-      user: "",
-      pass: "",
-      passConfigured: false,
-    },
-    verification: {
-      codeTtlMinutes: 10,
-      resendCooldownSeconds: 60,
-    },
-  });
-  const [configStatus, setConfigStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
 
   // Learning progress state
   const [courses, setCourses] = useState<CourseProgress[]>([]);
@@ -151,24 +135,6 @@ export default function ProfilePage() {
 
     loadConnection();
   }, []);
-
-  useEffect(() => {
-    async function loadServerConfig() {
-      if (role !== "admin") return;
-      const response = await fetch("/api/admin/config");
-      if (!response.ok) return;
-      const config = await response.json() as typeof serverConfig;
-      setServerConfig({
-        ...config,
-        email: {
-          ...config.email,
-          pass: "",
-        },
-      });
-    }
-
-    loadServerConfig();
-  }, [role]);
 
   const fetchGitHub = useCallback(async (username: string) => {
     if (!username) return;
@@ -221,54 +187,6 @@ export default function ProfilePage() {
     setPasswordStatus("saved");
   }
 
-  async function handleConfigSave(e: React.FormEvent) {
-    e.preventDefault();
-    setConfigStatus("saving");
-    const response = await fetch("/api/admin/config", {
-      method: "PUT",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(serverConfig),
-    });
-
-    if (!response.ok) {
-      setConfigStatus("error");
-      return;
-    }
-
-    const config = await response.json() as typeof serverConfig;
-    setServerConfig({
-      ...config,
-      email: {
-        ...config.email,
-        pass: "",
-      },
-    });
-    setConfigStatus("saved");
-  }
-
-  function updateEmailConfig(field: keyof typeof serverConfig.email, value: string | boolean | number) {
-    setServerConfig((current) => ({
-      ...current,
-      email: {
-        ...current.email,
-        [field]: value,
-      },
-    }));
-  }
-
-  function updateVerificationConfig(
-    field: keyof typeof serverConfig.verification,
-    value: number,
-  ) {
-    setServerConfig((current) => ({
-      ...current,
-      verification: {
-        ...current.verification,
-        [field]: value,
-      },
-    }));
-  }
-
   const startedCount = courses.length;
   const completedCount = courses.filter((c) => c.completedAt).length;
   const githubStatus = searchParams.get("github");
@@ -290,6 +208,18 @@ export default function ProfilePage() {
               </span>
             </div>
           </div>
+        </div>
+        <div className="profile-summary-actions">
+          <button
+            className="btn btn-ghost btn-sm"
+            type="button"
+            onClick={() => {
+              setShowPasswordForm(true);
+              setPasswordStatus("idle");
+            }}
+          >
+            {t("changePassword")}
+          </button>
         </div>
         <div className="profile-summary-stats">
           <SummaryStat label={t("coursesStarted")} value={startedCount} />
@@ -376,156 +306,6 @@ export default function ProfilePage() {
         </section>
 
         <aside className="profile-sidebar">
-          {role === "admin" && (
-            <>
-              <div className="glass-card profile-card">
-                <h2>{t("security")}</h2>
-                <form onSubmit={handlePasswordChange} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                  <div className="field">
-                    <label htmlFor="current-password">{t("currentPassword")}</label>
-                    <input
-                      id="current-password"
-                      type="password"
-                      value={currentPassword}
-                      onChange={(event) => setCurrentPassword(event.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="field">
-                    <label htmlFor="new-password">{t("newPassword")}</label>
-                    <input
-                      id="new-password"
-                      type="password"
-                      value={newPassword}
-                      onChange={(event) => setNewPassword(event.target.value)}
-                      minLength={12}
-                      required
-                    />
-                  </div>
-                  {passwordStatus === "saved" && (
-                    <p style={{ color: "var(--success)", fontSize: "0.82rem", margin: 0 }}>
-                      {t("passwordChanged")}
-                    </p>
-                  )}
-                  {passwordStatus === "error" && (
-                    <p style={{ color: "var(--danger)", fontSize: "0.82rem", margin: 0 }}>
-                      {t("passwordChangeFailed")}
-                    </p>
-                  )}
-                  <button className="btn btn-primary btn-sm" type="submit" disabled={passwordStatus === "saving"}>
-                    {passwordStatus === "saving" ? t("saving") : t("changePassword")}
-                  </button>
-                </form>
-              </div>
-
-              <div className="glass-card profile-card">
-                <h2>{t("serverConfig")}</h2>
-                <form onSubmit={handleConfigSave} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                  <div className="field">
-                    <label htmlFor="email-mode">{t("emailMode")}</label>
-                    <select
-                      id="email-mode"
-                      value={serverConfig.email.mode}
-                      onChange={(event) => updateEmailConfig("mode", event.target.value)}
-                    >
-                      <option value="smtp">smtp</option>
-                      <option value="log">log</option>
-                    </select>
-                  </div>
-                  <div className="field">
-                    <label htmlFor="email-from">{t("emailFrom")}</label>
-                    <input
-                      id="email-from"
-                      value={serverConfig.email.from}
-                      onChange={(event) => updateEmailConfig("from", event.target.value)}
-                      placeholder="Name <name@example.com>"
-                    />
-                  </div>
-                  <div className="field">
-                    <label htmlFor="email-host">{t("emailHost")}</label>
-                    <input
-                      id="email-host"
-                      value={serverConfig.email.host}
-                      onChange={(event) => updateEmailConfig("host", event.target.value)}
-                      placeholder="smtp.example.com"
-                    />
-                  </div>
-                  <div className="form-row">
-                    <div className="field">
-                      <label htmlFor="email-port">{t("emailPort")}</label>
-                      <input
-                        id="email-port"
-                        type="number"
-                        value={serverConfig.email.port}
-                        onChange={(event) => updateEmailConfig("port", Number(event.target.value))}
-                      />
-                    </div>
-                    <label className="field" htmlFor="email-secure">
-                      {t("emailSecure")}
-                      <input
-                        id="email-secure"
-                        type="checkbox"
-                        checked={serverConfig.email.secure}
-                        onChange={(event) => updateEmailConfig("secure", event.target.checked)}
-                      />
-                    </label>
-                  </div>
-                  <div className="field">
-                    <label htmlFor="email-user">{t("emailUser")}</label>
-                    <input
-                      id="email-user"
-                      value={serverConfig.email.user}
-                      onChange={(event) => updateEmailConfig("user", event.target.value)}
-                    />
-                  </div>
-                  <div className="field">
-                    <label htmlFor="email-pass">{t("emailPass")}</label>
-                    <input
-                      id="email-pass"
-                      type="password"
-                      value={serverConfig.email.pass}
-                      onChange={(event) => updateEmailConfig("pass", event.target.value)}
-                      placeholder={serverConfig.email.passConfigured ? t("secretConfigured") : ""}
-                    />
-                  </div>
-                  <div className="form-row">
-                    <div className="field">
-                      <label htmlFor="code-ttl">{t("codeTtl")}</label>
-                      <input
-                        id="code-ttl"
-                        type="number"
-                        value={serverConfig.verification.codeTtlMinutes}
-                        onChange={(event) => updateVerificationConfig("codeTtlMinutes", Number(event.target.value))}
-                      />
-                    </div>
-                    <div className="field">
-                      <label htmlFor="resend-cooldown">{t("resendCooldown")}</label>
-                      <input
-                        id="resend-cooldown"
-                        type="number"
-                        value={serverConfig.verification.resendCooldownSeconds}
-                        onChange={(event) => updateVerificationConfig("resendCooldownSeconds", Number(event.target.value))}
-                      />
-                    </div>
-                  </div>
-                  {configStatus === "saved" && (
-                    <p style={{ color: "var(--success)", fontSize: "0.82rem", margin: 0 }}>
-                      {t("configSaved")}
-                    </p>
-                  )}
-                  {configStatus === "error" && (
-                    <p style={{ color: "var(--danger)", fontSize: "0.82rem", margin: 0 }}>
-                      {t("configSaveFailed")}
-                    </p>
-                  )}
-                  <button className="btn btn-primary btn-sm" type="submit" disabled={configStatus === "saving"}>
-                    {configStatus === "saving" ? t("saving") : t("saveConfig")}
-                  </button>
-                </form>
-              </div>
-            </>
-          )}
-
           <div className="glass-card profile-card">
             <h2>{t("learning")}</h2>
             {startedCount > 0 ? (
@@ -578,6 +358,75 @@ export default function ProfilePage() {
           </div>
         </aside>
       </div>
+
+      {showPasswordForm && (
+        <>
+          <div
+            className="drawer-overlay"
+            onClick={() => {
+              setShowPasswordForm(false);
+              setCurrentPassword("");
+              setNewPassword("");
+              setPasswordStatus("idle");
+            }}
+          />
+          <div className="profile-password-modal glass-card">
+            <div className="profile-password-modal-header">
+              <h2>{t("changePassword")}</h2>
+              <button
+                className="btn btn-ghost btn-sm"
+                type="button"
+                onClick={() => {
+                  setShowPasswordForm(false);
+                  setCurrentPassword("");
+                  setNewPassword("");
+                  setPasswordStatus("idle");
+                }}
+              >
+                {t("cancel")}
+              </button>
+            </div>
+            <form onSubmit={handlePasswordChange} className="profile-security-form">
+              <div className="field">
+                <label htmlFor="current-password">{t("currentPassword")}</label>
+                <input
+                  id="current-password"
+                  type="password"
+                  value={currentPassword}
+                  onChange={(event) => setCurrentPassword(event.target.value)}
+                  required
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="new-password">{t("newPassword")}</label>
+                <input
+                  id="new-password"
+                  type="password"
+                  value={newPassword}
+                  onChange={(event) => setNewPassword(event.target.value)}
+                  minLength={12}
+                  required
+                />
+              </div>
+              {passwordStatus === "saved" && (
+                <p style={{ color: "var(--success)", fontSize: "0.82rem", margin: 0 }}>
+                  {t("passwordChanged")}
+                </p>
+              )}
+              {passwordStatus === "error" && (
+                <p style={{ color: "var(--danger)", fontSize: "0.82rem", margin: 0 }}>
+                  {t("passwordChangeFailed")}
+                </p>
+              )}
+              <div className="profile-security-actions">
+                <button className="btn btn-primary btn-sm" type="submit" disabled={passwordStatus === "saving"}>
+                  {passwordStatus === "saving" ? t("saving") : t("savePassword")}
+                </button>
+              </div>
+            </form>
+          </div>
+        </>
+      )}
     </main>
   );
 }

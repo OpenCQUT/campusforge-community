@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, type FormEvent, type ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { getAllApplications, updateApplication, type StoredApplication } from "@/lib/application-store";
 import { config } from "@/lib/config";
@@ -10,7 +10,8 @@ import { config } from "@/lib/config";
 type AppStatus = "SUBMITTED" | "UNDER_REVIEW" | "APPROVED" | "REJECTED" | "NEEDS_INFO";
 type Role = "STUDENT" | "MEMBER" | "MAINTAINER" | "ADMIN";
 type CourseStatus = "DRAFT" | "ACTIVE" | "ARCHIVED";
-type Section = "applications" | "members" | "invitations" | "courses" | "resources" | "audit";
+type Section = "applications" | "members" | "invitations" | "courses" | "resources" | "settings" | "audit";
+type ConfigStatus = "idle" | "loading" | "saving" | "saved" | "error";
 
 interface Application {
   id: string; name: string; email: string; studentId: string;
@@ -34,6 +35,81 @@ interface ResourceItem {
 interface AuditEntry {
   id: string; actor: string; action: string; target: string; time: string;
 }
+interface ServerConfigForm {
+  admin: {
+    email: string;
+    emails: string[];
+    passwordManagedByFile: boolean;
+  };
+  github: {
+    org: string;
+    token: string;
+    tokenConfigured: boolean;
+    clientId: string;
+    clientSecret: string;
+    clientSecretConfigured: boolean;
+  };
+  app: {
+    debug: boolean;
+    sessionSecretConfigured: boolean;
+  };
+  storage: {
+    dataDir: string;
+    logDir: string;
+  };
+  email: {
+    mode: string;
+    from: string;
+    host: string;
+    port: number;
+    secure: boolean;
+    user: string;
+    pass: string;
+    passConfigured: boolean;
+  };
+  verification: {
+    codeTtlMinutes: number;
+    resendCooldownSeconds: number;
+  };
+}
+
+const defaultServerConfig: ServerConfigForm = {
+  admin: {
+    email: "",
+    emails: [],
+    passwordManagedByFile: false,
+  },
+  github: {
+    org: "OpenCQUT",
+    token: "",
+    tokenConfigured: false,
+    clientId: "",
+    clientSecret: "",
+    clientSecretConfigured: false,
+  },
+  app: {
+    debug: false,
+    sessionSecretConfigured: false,
+  },
+  storage: {
+    dataDir: "",
+    logDir: "",
+  },
+  email: {
+    mode: "log",
+    from: "",
+    host: "",
+    port: 587,
+    secure: false,
+    user: "",
+    pass: "",
+    passConfigured: false,
+  },
+  verification: {
+    codeTtlMinutes: 10,
+    resendCooldownSeconds: 60,
+  },
+};
 
 // ─── Mock Data Factories ────────────────────────────────────────────────────
 
@@ -84,6 +160,8 @@ export default function AdminPage() {
 
   const [section, setSection] = useState<Section>("applications");
   const [toast, setToast] = useState<{ type: string; msg: string } | null>(null);
+  const [serverConfig, setServerConfig] = useState<ServerConfigForm>(defaultServerConfig);
+  const [configStatus, setConfigStatus] = useState<ConfigStatus>("idle");
 
   const showToast = useCallback((type: string, msg: string) => {
     setToast({ type, msg });
@@ -114,6 +192,34 @@ export default function AdminPage() {
 
   // Members state
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
+
+  useEffect(() => {
+    async function loadServerConfig() {
+      setConfigStatus("loading");
+      try {
+        const response = await fetch("/api/admin/config");
+        if (!response.ok) throw new Error("failed");
+        const nextConfig = await response.json() as ServerConfigForm;
+        setServerConfig({
+          ...nextConfig,
+          github: {
+            ...nextConfig.github,
+            token: "",
+            clientSecret: "",
+          },
+          email: {
+            ...nextConfig.email,
+            pass: "",
+          },
+        });
+        setConfigStatus("idle");
+      } catch {
+        setConfigStatus("error");
+      }
+    }
+
+    loadServerConfig();
+  }, []);
 
   function addAuditEntry(action: string, target: string) {
     const now = new Date();
@@ -163,6 +269,91 @@ export default function AdminPage() {
     showToast("success", t("resourceUpdated"));
   }
 
+  async function handleConfigSave(e: FormEvent) {
+    e.preventDefault();
+    setConfigStatus("saving");
+    const response = await fetch("/api/admin/config", {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(serverConfig),
+    });
+
+    if (!response.ok) {
+      setConfigStatus("error");
+      showToast("danger", t("configSaveFailed"));
+      return;
+    }
+
+    const nextConfig = await response.json() as ServerConfigForm;
+    setServerConfig({
+      ...nextConfig,
+      github: {
+        ...nextConfig.github,
+        token: "",
+        clientSecret: "",
+      },
+      email: {
+        ...nextConfig.email,
+        pass: "",
+      },
+    });
+    setConfigStatus("saved");
+    showToast("success", t("configSaved"));
+  }
+
+  function updateEmailConfig(field: keyof ServerConfigForm["email"], value: string | boolean | number) {
+    setServerConfig((current) => ({
+      ...current,
+      email: {
+        ...current.email,
+        [field]: value,
+      },
+    }));
+  }
+
+  function updateAdminConfig(field: keyof ServerConfigForm["admin"], value: string | string[] | boolean) {
+    setServerConfig((current) => ({
+      ...current,
+      admin: {
+        ...current.admin,
+        [field]: value,
+      },
+    }));
+  }
+
+  function updateGitHubConfig(field: keyof ServerConfigForm["github"], value: string | boolean) {
+    setServerConfig((current) => ({
+      ...current,
+      github: {
+        ...current.github,
+        [field]: value,
+      },
+    }));
+  }
+
+  function updateAppConfig(field: keyof ServerConfigForm["app"], value: boolean) {
+    setServerConfig((current) => ({
+      ...current,
+      app: {
+        ...current.app,
+        [field]: value,
+      },
+    }));
+  }
+
+  function updateVerificationConfig(
+    field: keyof ServerConfigForm["verification"],
+    value: number,
+  ) {
+    setServerConfig((current) => ({
+      ...current,
+      verification: {
+        ...current.verification,
+        [field]: value,
+      },
+    }));
+  }
+
   // Sidebar config
   const sidebarItems: { key: Section; label: string }[] = [
     { key: "applications", label: t("navApplications") },
@@ -170,6 +361,7 @@ export default function AdminPage() {
     { key: "invitations", label: t("navInvitations") },
     { key: "courses", label: t("navCourses") },
     { key: "resources", label: t("navResources") },
+    { key: "settings", label: t("navSettings") },
     { key: "audit", label: t("navAuditLog") },
   ];
 
@@ -204,7 +396,7 @@ export default function AdminPage() {
           ))}
         </aside>
 
-        <div className="admin-main">
+        <div className={`admin-main ${section === "settings" ? "admin-main-fixed" : ""}`}>
           {/* ── Applications ─────────────────────────────────── */}
           {section === "applications" && (
             <>
@@ -336,6 +528,231 @@ export default function AdminPage() {
             </>
           )}
 
+          {/* ── Settings ─────────────────────────────────────── */}
+          {section === "settings" && (
+            <div className="admin-settings-panel">
+              <SectionHeader title={t("settingsTitle")} subtitle={t("settingsSubtitle")} />
+              <form className="admin-config-form" onSubmit={handleConfigSave}>
+                <div className="admin-config-grid">
+                  <ConfigSection title={t("adminSettingsTitle")} subtitle={t("adminSettingsSubtitle")}>
+                    <div className="field">
+                      <label htmlFor="admin-email">{t("adminEmail")}</label>
+                      <input
+                        id="admin-email"
+                        value={serverConfig.admin.email}
+                        onChange={(event) => updateAdminConfig("email", event.target.value)}
+                        placeholder="admin@example.edu"
+                        disabled={configStatus === "loading"}
+                      />
+                    </div>
+                    <div className="field">
+                      <label htmlFor="admin-emails">{t("adminEmails")}</label>
+                      <textarea
+                        id="admin-emails"
+                        rows={3}
+                        value={serverConfig.admin.emails.join("\n")}
+                        onChange={(event) => updateAdminConfig(
+                          "emails",
+                          event.target.value
+                            .split(/[\n,]/)
+                            .map((item) => item.trim())
+                            .filter(Boolean),
+                        )}
+                        placeholder="admin@example.edu"
+                        disabled={configStatus === "loading"}
+                      />
+                    </div>
+                    <ReadOnlyField label={t("adminPasswordMode")} value={serverConfig.admin.passwordManagedByFile ? t("passwordFileManaged") : t("passwordConfigManaged")} />
+                  </ConfigSection>
+
+                  <ConfigSection title={t("githubSettingsTitle")} subtitle={t("githubSettingsSubtitle")}>
+                    <div className="field">
+                      <label htmlFor="github-org">{t("githubOrg")}</label>
+                      <input
+                        id="github-org"
+                        value={serverConfig.github.org}
+                        onChange={(event) => updateGitHubConfig("org", event.target.value)}
+                        disabled={configStatus === "loading"}
+                      />
+                    </div>
+                    <div className="field">
+                      <label htmlFor="github-token">{t("githubToken")}</label>
+                      <input
+                        id="github-token"
+                        type="password"
+                        value={serverConfig.github.token}
+                        onChange={(event) => updateGitHubConfig("token", event.target.value)}
+                        placeholder={serverConfig.github.tokenConfigured ? t("secretConfigured") : ""}
+                        disabled={configStatus === "loading"}
+                      />
+                    </div>
+                    <div className="field">
+                      <label htmlFor="github-client-id">{t("githubClientId")}</label>
+                      <input
+                        id="github-client-id"
+                        value={serverConfig.github.clientId}
+                        onChange={(event) => updateGitHubConfig("clientId", event.target.value)}
+                        disabled={configStatus === "loading"}
+                      />
+                    </div>
+                    <div className="field">
+                      <label htmlFor="github-client-secret">{t("githubClientSecret")}</label>
+                      <input
+                        id="github-client-secret"
+                        type="password"
+                        value={serverConfig.github.clientSecret}
+                        onChange={(event) => updateGitHubConfig("clientSecret", event.target.value)}
+                        placeholder={serverConfig.github.clientSecretConfigured ? t("secretConfigured") : ""}
+                        disabled={configStatus === "loading"}
+                      />
+                    </div>
+                  </ConfigSection>
+
+                  <ConfigSection title={t("emailSettingsTitle")} subtitle={t("emailSettingsSubtitle")}>
+                  <div className="field">
+                    <label htmlFor="email-mode">{t("emailMode")}</label>
+                    <select
+                      id="email-mode"
+                      value={serverConfig.email.mode}
+                      onChange={(event) => updateEmailConfig("mode", event.target.value)}
+                      disabled={configStatus === "loading"}
+                    >
+                      <option value="smtp">smtp</option>
+                      <option value="log">log</option>
+                    </select>
+                  </div>
+                  <div className="field">
+                    <label htmlFor="email-from">{t("emailFrom")}</label>
+                    <input
+                      id="email-from"
+                      value={serverConfig.email.from}
+                      onChange={(event) => updateEmailConfig("from", event.target.value)}
+                      placeholder="Name <name@example.com>"
+                      disabled={configStatus === "loading"}
+                    />
+                  </div>
+                  <div className="form-row">
+                    <div className="field">
+                      <label htmlFor="email-host">{t("emailHost")}</label>
+                      <input
+                        id="email-host"
+                        value={serverConfig.email.host}
+                        onChange={(event) => updateEmailConfig("host", event.target.value)}
+                        placeholder="smtp.example.com"
+                        disabled={configStatus === "loading"}
+                      />
+                    </div>
+                    <div className="field">
+                      <label htmlFor="email-port">{t("emailPort")}</label>
+                      <input
+                        id="email-port"
+                        type="number"
+                        value={serverConfig.email.port}
+                        onChange={(event) => updateEmailConfig("port", Number(event.target.value))}
+                        disabled={configStatus === "loading"}
+                      />
+                    </div>
+                  </div>
+                  <div className="field">
+                    <label htmlFor="email-user">{t("emailUser")}</label>
+                    <input
+                      id="email-user"
+                      value={serverConfig.email.user}
+                      onChange={(event) => updateEmailConfig("user", event.target.value)}
+                      disabled={configStatus === "loading"}
+                    />
+                  </div>
+                  <div className="field">
+                    <label htmlFor="email-pass">{t("emailPass")}</label>
+                    <input
+                      id="email-pass"
+                      type="password"
+                      value={serverConfig.email.pass}
+                      onChange={(event) => updateEmailConfig("pass", event.target.value)}
+                      placeholder={serverConfig.email.passConfigured ? t("secretConfigured") : ""}
+                      disabled={configStatus === "loading"}
+                    />
+                  </div>
+                  <label className="admin-checkbox" htmlFor="email-secure">
+                    <input
+                      id="email-secure"
+                      type="checkbox"
+                      checked={serverConfig.email.secure}
+                      onChange={(event) => updateEmailConfig("secure", event.target.checked)}
+                      disabled={configStatus === "loading"}
+                    />
+                    <span>{t("emailSecure")}</span>
+                  </label>
+                </ConfigSection>
+
+                  <ConfigSection title={t("verificationSettingsTitle")} subtitle={t("verificationSettingsSubtitle")}>
+                  <div className="form-row">
+                    <div className="field">
+                      <label htmlFor="code-ttl">{t("codeTtl")}</label>
+                      <input
+                        id="code-ttl"
+                        type="number"
+                        min={1}
+                        value={serverConfig.verification.codeTtlMinutes}
+                        onChange={(event) => updateVerificationConfig("codeTtlMinutes", Number(event.target.value))}
+                        disabled={configStatus === "loading"}
+                      />
+                    </div>
+                    <div className="field">
+                      <label htmlFor="resend-cooldown">{t("resendCooldown")}</label>
+                      <input
+                        id="resend-cooldown"
+                        type="number"
+                        min={10}
+                        value={serverConfig.verification.resendCooldownSeconds}
+                        onChange={(event) => updateVerificationConfig("resendCooldownSeconds", Number(event.target.value))}
+                        disabled={configStatus === "loading"}
+                      />
+                    </div>
+                  </div>
+                </ConfigSection>
+
+                  <ConfigSection title={t("appSettingsTitle")} subtitle={t("appSettingsSubtitle")}>
+                    <label className="admin-checkbox" htmlFor="app-debug">
+                      <input
+                        id="app-debug"
+                        type="checkbox"
+                        checked={serverConfig.app.debug}
+                        onChange={(event) => updateAppConfig("debug", event.target.checked)}
+                        disabled={configStatus === "loading"}
+                      />
+                      <span>{t("debugMode")}</span>
+                    </label>
+                    <ReadOnlyField label={t("sessionSecret")} value={serverConfig.app.sessionSecretConfigured ? t("configured") : t("notConfigured")} />
+                  </ConfigSection>
+
+                  <ConfigSection title={t("storageSettingsTitle")} subtitle={t("storageSettingsSubtitle")}>
+                    <div className="admin-readonly-grid">
+                      <ReadOnlyField label={t("dataDir")} value={serverConfig.storage.dataDir || "-"} />
+                      <ReadOnlyField label={t("logDir")} value={serverConfig.storage.logDir || "-"} />
+                    </div>
+                  </ConfigSection>
+                </div>
+
+                <div className="admin-config-footer">
+                  {configStatus === "error" && (
+                    <p className="admin-settings-status admin-settings-status-error">
+                      {t("configSaveFailed")}
+                    </p>
+                  )}
+                  {configStatus === "saved" && (
+                    <p className="admin-settings-status admin-settings-status-success">
+                      {t("configSaved")}
+                    </p>
+                  )}
+                  <button className="btn btn-primary btn-sm" type="submit" disabled={configStatus === "saving" || configStatus === "loading"}>
+                    {configStatus === "saving" ? t("saving") : t("saveConfig")}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
           {/* ── Audit Log ────────────────────────────────────── */}
           {section === "audit" && (
             <>
@@ -451,7 +868,7 @@ export default function AdminPage() {
 
 // ─── Shared Components ──────────────────────────────────────────────────────
 
-function SectionHeader({ title, subtitle, children }: { title: string; subtitle?: string; children?: React.ReactNode }) {
+function SectionHeader({ title, subtitle, children }: { title: string; subtitle?: string; children?: ReactNode }) {
   return (
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: children ? "center" : "flex-start", marginBottom: 20, flexDirection: children ? "row" : "column", gap: 8 }}>
       <div>
@@ -465,4 +882,37 @@ function SectionHeader({ title, subtitle, children }: { title: string; subtitle?
 
 function Empty({ msg }: { msg: string }) {
   return <div className="glass-card" style={{ padding: 40, textAlign: "center" }}><p style={{ color: "var(--text-500)" }}>{msg}</p></div>;
+}
+
+function ConfigSection({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string;
+  subtitle: string;
+  children: ReactNode;
+}) {
+  return (
+    <details className="glass-card admin-config-card">
+      <summary className="admin-config-summary">
+        <span>
+          <h3>{title}</h3>
+          <p>{subtitle}</p>
+        </span>
+      </summary>
+      <div className="admin-config-card-body">
+        {children}
+      </div>
+    </details>
+  );
+}
+
+function ReadOnlyField({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="admin-readonly-field">
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
 }

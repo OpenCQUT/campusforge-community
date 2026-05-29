@@ -3,6 +3,9 @@ import { dirname, join } from "node:path";
 import type { ServerConfig } from "./server-config";
 
 export interface RuntimeConfig {
+  admin?: Partial<Pick<ServerConfig["admin"], "email" | "emails">>;
+  github?: Partial<ServerConfig["github"]>;
+  app?: Partial<Pick<ServerConfig["app"], "debug">>;
   email?: Partial<ServerConfig["email"]>;
   verification?: Partial<ServerConfig["verification"]>;
 }
@@ -31,6 +34,18 @@ export function mergeRuntimeConfig(config: ServerConfig): ServerConfig {
   const runtime = readRuntimeConfig(config.storage.dataDir);
   return {
     ...config,
+    admin: {
+      ...config.admin,
+      ...runtime.admin,
+    },
+    github: {
+      ...config.github,
+      ...runtime.github,
+    },
+    app: {
+      ...config.app,
+      ...runtime.app,
+    },
     email: {
       ...config.email,
       ...runtime.email,

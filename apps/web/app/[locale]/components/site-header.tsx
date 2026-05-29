@@ -19,8 +19,21 @@ export function SiteHeader() {
   const [role, setRole] = useState<string | null>(null);
 
   useEffect(() => {
-    setRole(getSessionRole());
-  }, []);
+    function syncRole() {
+      setRole(getSessionRole());
+    }
+
+    syncRole();
+    window.addEventListener("focus", syncRole);
+    window.addEventListener("visibilitychange", syncRole);
+    window.addEventListener("campusforge-session-change", syncRole);
+
+    return () => {
+      window.removeEventListener("focus", syncRole);
+      window.removeEventListener("visibilitychange", syncRole);
+      window.removeEventListener("campusforge-session-change", syncRole);
+    };
+  }, [pathname]);
 
 
   const isLoggedIn = role !== null;
@@ -63,7 +76,9 @@ export function SiteHeader() {
     await fetch("/api/session", { method: "DELETE" }).catch(() => undefined);
     document.cookie = "cf_role=; path=/; max-age=0";
     document.cookie = "cf_email=; path=/; max-age=0";
-    router.push("/");
+    setRole(null);
+    window.dispatchEvent(new Event("campusforge-session-change"));
+    window.location.assign(`/${locale}`);
   }
 
   return (

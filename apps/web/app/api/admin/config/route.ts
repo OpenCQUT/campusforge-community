@@ -11,6 +11,19 @@ import { getSessionFromRequest, getSessionSecret } from "@/lib/session";
 export const runtime = "nodejs";
 
 interface ConfigBody {
+  admin?: {
+    email?: unknown;
+    emails?: unknown;
+  };
+  github?: {
+    org?: unknown;
+    token?: unknown;
+    clientId?: unknown;
+    clientSecret?: unknown;
+  };
+  app?: {
+    debug?: unknown;
+  };
   email?: {
     mode?: unknown;
     from?: unknown;
@@ -43,6 +56,24 @@ async function requireAdmin(request: Request): Promise<ServerConfig | NextRespon
 
 function publicConfig(config: ServerConfig) {
   return {
+    admin: {
+      email: config.admin.email,
+      emails: config.admin.emails,
+      passwordManagedByFile: !config.admin.password,
+    },
+    github: {
+      org: config.github.org,
+      token: "",
+      tokenConfigured: Boolean(config.github.token),
+      clientId: config.github.clientId,
+      clientSecret: "",
+      clientSecretConfigured: Boolean(config.github.clientSecret),
+    },
+    app: {
+      debug: config.app.debug,
+      sessionSecretConfigured: Boolean(config.app.sessionSecret),
+    },
+    storage: config.storage,
     email: {
       mode: config.email.mode,
       from: config.email.from,
@@ -61,6 +92,27 @@ function numberFrom(value: unknown, fallback: number): number {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+function stringFrom(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function stringListFrom(value: unknown, fallback: string[]): string[] {
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => (typeof item === "string" ? item.trim().toLowerCase() : ""))
+      .filter(Boolean);
+  }
+
+  if (typeof value === "string") {
+    return value
+      .split(/[\n,]/)
+      .map((item) => item.trim().toLowerCase())
+      .filter(Boolean);
+  }
+
+  return fallback;
+}
+
 export async function GET(request: Request) {
   const config = await requireAdmin(request);
   if (config instanceof NextResponse) return config;
@@ -73,10 +125,42 @@ export async function PUT(request: Request) {
 
   const body = (await request.json().catch(() => ({}))) as ConfigBody;
   const existingRuntime = readRuntimeConfig(config.storage.dataDir);
+  const admin = body.admin ?? {};
+  const github = body.github ?? {};
+  const app = body.app ?? {};
   const email = body.email ?? {};
   const verification = body.verification ?? {};
+  const adminEmail = stringFrom(admin.email).toLowerCase();
+  const adminEmails = Array.from(
+    new Set([
+      ...stringListFrom(admin.emails, existingRuntime.admin?.emails ?? config.admin.emails),
+      adminEmail,
+    ].filter(Boolean)),
+  );
   const nextRuntime: RuntimeConfig = {
     ...existingRuntime,
+    admin: {
+      ...existingRuntime.admin,
+      email: adminEmail || config.admin.email,
+      emails: adminEmails.length > 0 ? adminEmails : config.admin.emails,
+    },
+    github: {
+      ...existingRuntime.github,
+      org: stringFrom(github.org) || config.github.org,
+      token:
+        typeof github.token === "string" && github.token.length > 0
+          ? github.token
+          : (existingRuntime.github?.token ?? config.github.token),
+      clientId: stringFrom(github.clientId),
+      clientSecret:
+        typeof github.clientSecret === "string" && github.clientSecret.length > 0
+          ? github.clientSecret
+          : (existingRuntime.github?.clientSecret ?? config.github.clientSecret),
+    },
+    app: {
+      ...existingRuntime.app,
+      debug: Boolean(app.debug),
+    },
     email: {
       ...existingRuntime.email,
       mode: email.mode === "smtp" ? "smtp" : "log",

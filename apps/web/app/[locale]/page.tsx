@@ -1,13 +1,19 @@
 "use client";
 
-import { useState } from "react";
-import { useTranslations } from "next-intl";
-import { Link, useRouter } from "@/i18n/navigation";
+import { useEffect, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
+
+function getSessionRole(): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(/cf_role=(\w+)/);
+  return match?.[1] ?? null;
+}
 
 export default function LoginPage() {
   const t = useTranslations("login");
   const tc = useTranslations("common");
-  const router = useRouter();
+  const locale = useLocale();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -15,15 +21,26 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
 
+  useEffect(() => {
+    const role = getSessionRole();
+    if (role === "admin") {
+      window.location.replace(`/${locale}/admin`);
+    }
+  }, [locale]);
+
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
+    const form = e.currentTarget as HTMLFormElement;
+    const formData = new FormData(form);
+    const submittedEmail = String(formData.get("email") ?? email);
+    const submittedPassword = String(formData.get("password") ?? password);
     setError("");
     setIsSubmitting(true);
 
     const response = await fetch("/api/session", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email: submittedEmail, password: submittedPassword }),
     });
 
     setIsSubmitting(false);
@@ -33,7 +50,8 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/admin");
+    window.dispatchEvent(new Event("campusforge-session-change"));
+    window.location.assign(`/${locale}/admin`);
   }
 
   return (
@@ -80,6 +98,7 @@ export default function LoginPage() {
                 <label htmlFor="email">{t("emailLabel")}</label>
                 <input
                   id="email"
+                  name="email"
                   type="email"
                   placeholder={t("emailPlaceholder")}
                   value={email}
@@ -91,6 +110,7 @@ export default function LoginPage() {
                 <label htmlFor="password">{t("passwordLabel")}</label>
                 <input
                   id="password"
+                  name="password"
                   type="password"
                   placeholder="••••••••"
                   value={password}
