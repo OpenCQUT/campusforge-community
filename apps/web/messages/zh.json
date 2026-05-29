@@ -125,7 +125,20 @@
     "colActions": "操作",
     "filterPending": "待审核",
     "filterApproved": "已通过",
-    "filterRejected": "已拒绝"
+    "filterRejected": "已拒绝",
+    "filterNeedsInfo": "需补充",
+    "drawerTitle": "审核申请",
+    "reason": "申请理由",
+    "reviewNote": "审核备注",
+    "reviewNotePlaceholder": "添加备注（可选）",
+    "approve": "通过",
+    "reject": "拒绝",
+    "requestInfo": "要求补充",
+    "close": "关闭",
+    "approved": "申请已通过",
+    "rejected": "申请已拒绝",
+    "infoRequested": "已要求补充信息",
+    "noApplications": "没有找到申请记录。"
   },
   "statusLabel": {
     "SUBMITTED": "已提交",

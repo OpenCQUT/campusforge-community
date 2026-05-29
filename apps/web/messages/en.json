@@ -125,7 +125,20 @@
     "colActions": "Actions",
     "filterPending": "Pending",
     "filterApproved": "Approved",
-    "filterRejected": "Rejected"
+    "filterRejected": "Rejected",
+    "filterNeedsInfo": "Needs Info",
+    "drawerTitle": "Review Application",
+    "reason": "Reason for joining",
+    "reviewNote": "Review note",
+    "reviewNotePlaceholder": "Add a note (optional)",
+    "approve": "Approve",
+    "reject": "Reject",
+    "requestInfo": "Request Info",
+    "close": "Close",
+    "approved": "Application approved",
+    "rejected": "Application rejected",
+    "infoRequested": "Info requested",
+    "noApplications": "No applications found."
   },
   "statusLabel": {
     "SUBMITTED": "Submitted",
