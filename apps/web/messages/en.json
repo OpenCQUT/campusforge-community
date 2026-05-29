@@ -158,6 +158,8 @@
     "reject": "Reject",
     "requestInfo": "Request Info",
     "close": "Close",
+    "viewReview": "View",
+    "reviewFinalized": "This application has been reviewed and can no longer be changed.",
     "approved": "Application approved",
     "rejected": "Application rejected",
     "infoRequested": "Info requested",

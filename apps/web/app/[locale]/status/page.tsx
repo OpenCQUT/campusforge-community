@@ -13,6 +13,21 @@ interface Application {
   submittedAt: string;
 }
 
+const STATUS_PROGRESS_INDEX: Record<Application["status"], number> = {
+  SUBMITTED: 0,
+  VERIFYING: 1,
+  UNDER_REVIEW: 2,
+  APPROVED: 3,
+  REJECTED: 3,
+  NEEDS_INFO: 3,
+};
+
+const DECISION_OUTCOME_CLASS: Partial<Record<Application["status"], string>> = {
+  APPROVED: "approved",
+  REJECTED: "rejected",
+  NEEDS_INFO: "needs-info",
+};
+
 // No demo data — all applications come from the shared store
 const MOCK_DB: Record<string, Application> = {};
 
@@ -141,19 +156,16 @@ export default function StatusPage() {
             </h2>
             <div className="status-timeline">
               {steps.map((step, i) => {
-                const statusOrder = [
-                  "SUBMITTED",
-                  "VERIFYING",
-                  "UNDER_REVIEW",
-                  "APPROVED",
-                ];
-                const currentIndex = statusOrder.indexOf(result.status);
+                const currentIndex = STATUS_PROGRESS_INDEX[result.status];
                 const isCompleted = i < currentIndex;
                 const isActive = i === currentIndex;
+                const outcomeClass = isActive && i === steps.length - 1
+                  ? DECISION_OUTCOME_CLASS[result.status] ?? ""
+                  : "";
                 return (
                   <div
                     key={step.key}
-                    className={`timeline-step ${isCompleted ? "completed" : ""} ${isActive ? "active" : ""}`}
+                    className={`timeline-step ${isCompleted ? "completed" : ""} ${isActive ? "active" : ""} ${outcomeClass}`}
                   >
                     <div className="timeline-dot">
                       {isCompleted ? "\u2713" : i + 1}

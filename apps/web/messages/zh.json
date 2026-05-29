@@ -158,6 +158,8 @@
     "reject": "拒绝",
     "requestInfo": "要求补充",
     "close": "关闭",
+    "viewReview": "查看",
+    "reviewFinalized": "该申请已完成审核，不能再修改结果。",
     "approved": "申请已通过",
     "rejected": "申请已拒绝",
     "infoRequested": "已要求补充信息",

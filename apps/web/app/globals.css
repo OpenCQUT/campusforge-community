@@ -507,6 +507,13 @@ img {
   box-shadow: 0 0 0 3px rgba(47, 128, 255, 0.15);
 }
 
+.field input:disabled,
+.field textarea:disabled,
+.field select:disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
 .field textarea {
   resize: vertical;
   min-height: 100px;
@@ -829,6 +836,27 @@ img {
   color: var(--blue);
   background: rgba(47, 128, 255, 0.1);
   box-shadow: 0 0 12px rgba(47, 128, 255, 0.3);
+}
+
+.timeline-step.active.approved .timeline-dot {
+  border-color: var(--success);
+  color: var(--success);
+  background: rgba(33, 214, 162, 0.1);
+  box-shadow: 0 0 12px rgba(33, 214, 162, 0.28);
+}
+
+.timeline-step.active.rejected .timeline-dot {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: rgba(255, 95, 125, 0.1);
+  box-shadow: 0 0 12px rgba(255, 95, 125, 0.28);
+}
+
+.timeline-step.active.needs-info .timeline-dot {
+  border-color: #f0a500;
+  color: #f0a500;
+  background: rgba(240, 165, 0, 0.1);
+  box-shadow: 0 0 12px rgba(240, 165, 0, 0.24);
 }
 
 .timeline-content h4 {

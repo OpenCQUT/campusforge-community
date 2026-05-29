@@ -70,6 +70,10 @@ const roleColors: Record<Role, string> = {
   STUDENT: "tag-muted", MEMBER: "tag-blue", MAINTAINER: "tag-purple", ADMIN: "tag-cyan",
 };
 
+function isReviewableStatus(status: AppStatus): boolean {
+  return status === "SUBMITTED" || status === "UNDER_REVIEW";
+}
+
 // ─── Main Component ─────────────────────────────────────────────────────────
 
 export default function AdminPage() {
@@ -122,6 +126,7 @@ export default function AdminPage() {
 
   function handleAppAction(status: AppStatus) {
     if (!selectedApp) return;
+    if (!isReviewableStatus(selectedApp.status)) return;
     const label = status === "APPROVED" ? t("approved") : status === "REJECTED" ? t("rejected") : t("infoRequested");
     setApplications((prev) => prev.map((a) => a.id === selectedApp.id ? { ...a, status, reviewNote } : a));
     updateApplication(selectedApp.id, { status, reviewNote });
@@ -220,7 +225,11 @@ export default function AdminPage() {
                       <td>{a.email}</td><td>{a.department}</td>
                       <td><span className={`status status-${a.status.toLowerCase().replace("_", "-")}`}>{ts(a.status)}</span></td>
                       <td>{a.date}</td>
-                      <td><button className="btn btn-sm btn-ghost" onClick={() => { setSelectedApp(a); setReviewNote(a.reviewNote); }}>{tc("review")}</button></td>
+                      <td>
+                        <button className="btn btn-sm btn-ghost" onClick={() => { setSelectedApp(a); setReviewNote(a.reviewNote); }}>
+                          {isReviewableStatus(a.status) ? tc("review") : t("viewReview")}
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody></table></div>
@@ -374,14 +383,30 @@ export default function AdminPage() {
               </div>
               <div className="field">
                 <label htmlFor="review-note">{t("reviewNote")}</label>
-                <textarea id="review-note" rows={3} placeholder={t("reviewNotePlaceholder")} value={reviewNote} onChange={(e) => setReviewNote(e.target.value)} />
+                <textarea
+                  id="review-note"
+                  rows={3}
+                  placeholder={t("reviewNotePlaceholder")}
+                  value={reviewNote}
+                  onChange={(e) => setReviewNote(e.target.value)}
+                  disabled={!isReviewableStatus(selectedApp.status)}
+                />
               </div>
             </div>
-            <div className="drawer-footer">
-              <button className="btn btn-sm" style={{ background: "rgba(255,95,125,0.15)", color: "var(--danger)", border: "1px solid rgba(255,95,125,0.3)" }} onClick={() => handleAppAction("REJECTED")}>{t("reject")}</button>
-              <button className="btn btn-sm" style={{ background: "rgba(47,128,255,0.15)", color: "var(--blue)", border: "1px solid rgba(47,128,255,0.3)" }} onClick={() => handleAppAction("NEEDS_INFO")}>{t("requestInfo")}</button>
-              <button className="btn btn-sm" style={{ background: "rgba(33,214,162,0.15)", color: "var(--success)", border: "1px solid rgba(33,214,162,0.3)" }} onClick={() => handleAppAction("APPROVED")}>{t("approve")}</button>
-            </div>
+            {isReviewableStatus(selectedApp.status) ? (
+              <div className="drawer-footer">
+                <button className="btn btn-sm" style={{ background: "rgba(255,95,125,0.15)", color: "var(--danger)", border: "1px solid rgba(255,95,125,0.3)" }} onClick={() => handleAppAction("REJECTED")}>{t("reject")}</button>
+                <button className="btn btn-sm" style={{ background: "rgba(47,128,255,0.15)", color: "var(--blue)", border: "1px solid rgba(47,128,255,0.3)" }} onClick={() => handleAppAction("NEEDS_INFO")}>{t("requestInfo")}</button>
+                <button className="btn btn-sm" style={{ background: "rgba(33,214,162,0.15)", color: "var(--success)", border: "1px solid rgba(33,214,162,0.3)" }} onClick={() => handleAppAction("APPROVED")}>{t("approve")}</button>
+              </div>
+            ) : (
+              <div className="drawer-footer">
+                <p style={{ color: "var(--text-500)", fontSize: "0.85rem", marginRight: "auto" }}>
+                  {t("reviewFinalized")}
+                </p>
+                <button className="btn btn-sm btn-ghost" onClick={() => setSelectedApp(null)}>{t("close")}</button>
+              </div>
+            )}
           </div>
         </>
       )}
