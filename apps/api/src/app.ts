@@ -2,10 +2,10 @@ import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
 import rateLimit from "@fastify/rate-limit";
 import Fastify from "fastify";
-import type { ApiEnv } from "./env";
-import { MockApplicationRepository } from "./repositories/mock-application-repository";
-import { createApplicationRoutes } from "./routes/applications";
-import { registerHealthRoutes } from "./routes/health";
+import type { ApiEnv } from "./env.js";
+import { MockApplicationRepository } from "./repositories/mock-application-repository.js";
+import { createApplicationRoutes } from "./routes/applications.js";
+import { registerHealthRoutes } from "./routes/health.js";
 
 export async function buildApp(env: ApiEnv) {
   const app = Fastify({

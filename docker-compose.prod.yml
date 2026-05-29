@@ -1,0 +1,63 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: web-runner
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
+        NEXT_PUBLIC_ADMIN_EMAIL: ${NEXT_PUBLIC_ADMIN_EMAIL}
+        NEXT_PUBLIC_DEBUG: ${NEXT_PUBLIC_DEBUG:-false}
+    image: campusforge-web:latest
+    container_name: campusforge-web
+    restart: unless-stopped
+    env_file:
+      - ${CAMPUSFORGE_ENV_FILE:-/opt/campusforge/.env}
+    environment:
+      NODE_ENV: production
+    ports:
+      - "127.0.0.1:${WEB_PORT:-3000}:3000"
+    volumes:
+      - ${CAMPUSFORGE_CONFIG_FILE:-/opt/campusforge/config.toml}:/app/config.toml:ro
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "require('node:http').get('http://127.0.0.1:3000/zh', r => process.exit(r.statusCode < 500 ? 0 : 1)).on('error', () => process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      api:
+        condition: service_started
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: api-runner
+    image: campusforge-api:latest
+    container_name: campusforge-api
+    restart: unless-stopped
+    env_file:
+      - ${CAMPUSFORGE_ENV_FILE:-/opt/campusforge/.env}
+    environment:
+      NODE_ENV: production
+    ports:
+      - "127.0.0.1:${API_PORT:-4000}:4000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "require('node:http').get('http://127.0.0.1:4000/v1/health', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

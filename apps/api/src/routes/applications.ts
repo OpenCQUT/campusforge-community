@@ -1,11 +1,11 @@
 import type { FastifyPluginAsync } from "fastify";
 import { z } from "zod";
-import type { ApplicationRepository } from "../repositories/application-repository";
+import type { ApplicationRepository } from "../repositories/application-repository.js";
 import {
   ApplicationConflictError,
   ApplicationNotFoundError,
   ApplicationReviewError,
-} from "../repositories/mock-application-repository";
+} from "../repositories/mock-application-repository.js";
 
 const createApplicationBody = z.object({
   schoolEmail: z.string().email(),

@@ -4,7 +4,7 @@ import type {
   ApplicationRepository,
   CreateApplicationInput,
   ReviewApplicationInput,
-} from "./application-repository";
+} from "./application-repository.js";
 
 export class MockApplicationRepository implements ApplicationRepository {
   private readonly store = new Map<string, Application>();
