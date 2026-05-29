@@ -18,6 +18,7 @@
     "status": "Status",
     "resources": "Resources",
     "courses": "Courses",
+    "issues": "Tasks",
     "policies": "Policies",
     "admin": "Admin",
     "profile": "Profile"
@@ -106,6 +107,24 @@
   "resources": {
     "title": "Resources",
     "subtitle": "Guides, templates, tools, and documents shared by the community."
+  },
+  "issues": {
+    "title": "{org} Issues",
+    "subtitle": "Browse open issues across the organization, claim one, and start contributing.",
+    "loading": "Loading issues...",
+    "empty": "No open issues right now.",
+    "loadFailed": "Unable to load GitHub issues.",
+    "comments": "{count} comments",
+    "noLabels": "No labels",
+    "assigned": "Assigned",
+    "unassigned": "Available",
+    "claim": "Claim",
+    "claiming": "Claiming...",
+    "claimed": "Claimed",
+    "claimSuccess": "Claimed and assigned on GitHub.",
+    "claimLocalOnly": "Added to your task list; GitHub token is missing or unavailable, so remote assignment was skipped.",
+    "claimFailed": "Unable to claim this issue. Try again later.",
+    "connectGitHubFirst": "Connect your GitHub username in Profile first."
   },
   "courses": {
     "title": "Courses",
@@ -228,6 +247,11 @@
     "coursesCompleted": "Courses Completed",
     "noCourses": "No course activity yet.",
     "viewAllCourses": "Browse Courses",
+    "activeTasks": "Active Tasks",
+    "noActiveTasks": "No claimed tasks yet.",
+    "browseIssues": "Browse Tasks",
+    "assignedOnGitHub": "Assigned on GitHub",
+    "localTask": "Local Task",
     "loading": "Loading..."
   },
 

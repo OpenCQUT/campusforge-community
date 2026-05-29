@@ -32,6 +32,7 @@ export function SiteHeader() {
   ];
 
   const memberNav = [
+    { href: "/issues", label: t("nav.issues") },
     { href: "/resources", label: t("nav.resources") },
     { href: "/courses", label: t("nav.courses") },
     { href: "/policies", label: t("nav.policies") },
@@ -40,6 +41,7 @@ export function SiteHeader() {
 
   const adminNav = [
     { href: "/admin", label: t("nav.admin") },
+    { href: "/issues", label: t("nav.issues") },
     { href: "/resources", label: t("nav.resources") },
     { href: "/courses", label: t("nav.courses") },
     { href: "/policies", label: t("nav.policies") },

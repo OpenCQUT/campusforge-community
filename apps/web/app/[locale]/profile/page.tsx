@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { getCourseProgress, type CourseProgress } from "@/lib/learning-store";
+import { getClaimedIssueTasks, type ClaimedIssueTask } from "@/lib/issue-task-store";
 
 // ─── Session helpers ────────────────────────────────────────────────────────
 
@@ -212,9 +213,11 @@ export default function ProfilePage() {
 
   // Learning progress state
   const [courses, setCourses] = useState<CourseProgress[]>([]);
+  const [issueTasks, setIssueTasks] = useState<ClaimedIssueTask[]>([]);
 
   useEffect(() => {
     setCourses(getCourseProgress());
+    setIssueTasks(getClaimedIssueTasks());
   }, []);
 
   const fetchGitHub = useCallback(async (username: string) => {
@@ -383,6 +386,30 @@ export default function ProfilePage() {
               <div>
                 <p className="profile-muted">{t("noCourses")}</p>
                 <Link href="/courses" className="btn btn-ghost btn-sm">{t("viewAllCourses")}</Link>
+              </div>
+            )}
+          </div>
+
+          <div className="glass-card profile-card">
+            <h2>{t("activeTasks")}</h2>
+            {issueTasks.length > 0 ? (
+              <div className="profile-list">
+                {issueTasks.map((task) => (
+                  <a key={task.id} href={task.url} target="_blank" rel="noreferrer" className="profile-list-row profile-repo-row">
+                    <span>
+                      {task.title}
+                      <small>{task.owner}/{task.repo} #{task.number}</small>
+                    </span>
+                    <span className={`tag ${task.remoteAssigned ? "tag-success" : "tag-blue"}`}>
+                      {task.remoteAssigned ? t("assignedOnGitHub") : t("localTask")}
+                    </span>
+                  </a>
+                ))}
+              </div>
+            ) : (
+              <div>
+                <p className="profile-muted">{t("noActiveTasks")}</p>
+                <Link href="/issues" className="btn btn-ghost btn-sm">{t("browseIssues")}</Link>
               </div>
             )}
           </div>

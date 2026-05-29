@@ -18,6 +18,7 @@
     "status": "状态",
     "resources": "资源",
     "courses": "课程",
+    "issues": "任务",
     "policies": "制度",
     "admin": "管理",
     "profile": "个人"
@@ -106,6 +107,24 @@
   "resources": {
     "title": "资源中心",
     "subtitle": "社区成员分享的指南、模板、工具和文档。"
+  },
+  "issues": {
+    "title": "{org} Issues",
+    "subtitle": "浏览组织仓库中的开放 Issue，选择一个任务认领并开始贡献。",
+    "loading": "正在加载 Issue...",
+    "empty": "当前没有开放 Issue。",
+    "loadFailed": "无法加载 GitHub Issue。",
+    "comments": "{count} 条评论",
+    "noLabels": "无标签",
+    "assigned": "已分配",
+    "unassigned": "可认领",
+    "claim": "认领",
+    "claiming": "认领中...",
+    "claimed": "已认领",
+    "claimSuccess": "已认领，并已同步分配到 GitHub。",
+    "claimLocalOnly": "已加入你的任务列表；GitHub Token 未配置或不可用，暂未同步远端分配。",
+    "claimFailed": "认领失败，请稍后重试。",
+    "connectGitHubFirst": "请先在个人中心绑定 GitHub 用户名。"
   },
   "courses": {
     "title": "课程中心",
@@ -228,6 +247,11 @@
     "coursesCompleted": "已完成课程",
     "noCourses": "暂无课程记录。",
     "viewAllCourses": "浏览课程",
+    "activeTasks": "正在做的任务",
+    "noActiveTasks": "暂无认领任务。",
+    "browseIssues": "浏览任务",
+    "assignedOnGitHub": "GitHub 已分配",
+    "localTask": "本地任务",
     "loading": "加载中..."
   },
 

@@ -6,6 +6,10 @@ interface ServerConfig {
     email: string;
     password: string;
   };
+  github: {
+    org: string;
+    token: string;
+  };
   app: {
     debug: boolean;
   };
@@ -18,6 +22,10 @@ const DEFAULT_CONFIG: ServerConfig = {
   admin: {
     email: "",
     password: "",
+  },
+  github: {
+    org: "OpenCQUT",
+    token: "",
   },
   app: {
     debug: false,
@@ -125,6 +133,10 @@ export function loadServerConfig(): ServerConfig {
         admin: {
           email: asString(parsed.admin?.email).trim(),
           password: asString(parsed.admin?.password),
+        },
+        github: {
+          org: asString(parsed.github?.org).trim() || DEFAULT_CONFIG.github.org,
+          token: asString(parsed.github?.token).trim(),
         },
         app: {
           debug: asBoolean(parsed.app?.debug),

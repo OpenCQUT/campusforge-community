@@ -49,6 +49,9 @@ cp config.example.toml config.toml
 pnpm dev
 ```
 
+GitHub Issue 认领功能会读取 `[github]` 配置。`token` 留空时仍可在站内认领任务，
+但不会自动同步 GitHub assignee；要同步远端分配，需要配置具备组织仓库 Issue 写权限的 token。
+
 默认端口：
 
 - Web: `http://localhost:3000`

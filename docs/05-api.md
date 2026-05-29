@@ -2,6 +2,8 @@
 
 Base URL：`/v1`
 
+Next.js Web API Base URL：`/api`
+
 ## 当前已实现接口
 
 ### `GET /health`
@@ -59,6 +61,63 @@ Request body:
 ```
 
 `status` 可选值：`APPROVED`、`REJECTED`、`NEEDS_INFO`。
+
+## Web 应用接口
+
+### `GET /api/github/issues`
+
+列出 `config.toml` 中 `[github].org` 组织下的开放 Issue。默认组织为 `OpenCQUT`。
+需要已登录会话；未登录返回 `401`。
+
+Response:
+
+```json
+{
+  "org": "OpenCQUT",
+  "items": [
+    {
+      "id": "123",
+      "owner": "OpenCQUT",
+      "repo": "campusforge-community",
+      "number": 12,
+      "title": "Fix profile layout",
+      "url": "https://github.com/OpenCQUT/campusforge-community/issues/12",
+      "state": "open",
+      "comments": 2,
+      "createdAt": "2026-05-01T00:00:00Z",
+      "updatedAt": "2026-05-02T00:00:00Z",
+      "labels": [{ "name": "good first issue", "color": "7057ff" }],
+      "assignees": [],
+      "author": "octocat"
+    }
+  ]
+}
+```
+
+### `POST /api/github/issues/claim`
+
+认领 GitHub Issue。需要已登录会话；未登录返回 `401`。
+服务端读取 `[github].token` 并调用 GitHub assignees API。
+Token 需要具备目标仓库 Issue 写权限；未配置 Token 时接口返回 `202`，前端仍会把任务加入本地个人任务列表，但不会同步 GitHub 远端 assign。
+
+Request body:
+
+```json
+{
+  "owner": "OpenCQUT",
+  "repo": "campusforge-community",
+  "number": 12,
+  "assignee": "github-user"
+}
+```
+
+Response:
+
+```json
+{
+  "remoteAssigned": true
+}
+```
 
 ## 待实现接口方向
 
