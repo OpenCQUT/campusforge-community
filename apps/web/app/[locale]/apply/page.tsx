@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { addApplication } from "@/lib/application-store";
+import { validateEmail } from "@/lib/email-validation";
 
 export default function ApplyPage() {
   const t = useTranslations("apply");
@@ -18,7 +19,14 @@ export default function ApplyPage() {
 
   function validate(): boolean {
     const e: Record<string, string> = {};
-    if (!email.trim()) e.email = t("fieldRequired");
+    if (!email.trim()) {
+      e.email = t("fieldRequired");
+    } else {
+      const result = validateEmail(email);
+      if (!result.ok) {
+        e.email = result.error === "format" ? t("emailInvalid") : t("emailDomain");
+      }
+    }
     if (!studentId.trim()) e.studentId = t("fieldRequired");
     if (!department.trim()) e.department = t("fieldRequired");
     if (!reason.trim()) e.reason = t("fieldRequired");
