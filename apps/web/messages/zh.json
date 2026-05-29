@@ -68,7 +68,13 @@
     "step2": "管理员审核",
     "step3": "结果通知",
     "eligibility": "申请条件",
-    "eligibilityDesc": "需要有效的学校邮箱和学号。申请将根据社区准则进行审核。"
+    "eligibilityDesc": "需要有效的学校邮箱和学号。申请将根据社区准则进行审核。",
+    "successTitle": "申请已提交",
+    "successDesc": "您的申请已收到。您可以随时查看申请状态。",
+    "checkStatus": "查看申请状态",
+    "submitAnother": "再次提交",
+    "fieldRequired": "此项为必填。",
+    "reasonTooShort": "请至少填写 10 个字符。"
   },
   "status": {
     "title": "申请状态",

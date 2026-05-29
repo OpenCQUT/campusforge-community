@@ -68,7 +68,13 @@
     "step2": "Admin review",
     "step3": "Decision notification",
     "eligibility": "Eligibility",
-    "eligibilityDesc": "You need a valid school email address and a student ID. Applications are reviewed based on community guidelines."
+    "eligibilityDesc": "You need a valid school email address and a student ID. Applications are reviewed based on community guidelines.",
+    "successTitle": "Application Submitted",
+    "successDesc": "Your application has been received. You can check its status at any time.",
+    "checkStatus": "Check Application Status",
+    "submitAnother": "Submit Another",
+    "fieldRequired": "This field is required.",
+    "reasonTooShort": "Please write at least 10 characters."
   },
   "status": {
     "title": "Application Status",
