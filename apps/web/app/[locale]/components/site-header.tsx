@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 
@@ -14,7 +15,14 @@ export function SiteHeader() {
   const t = useTranslations();
   const locale = useLocale();
   const router = useRouter();
-  const role = getSessionRole();
+
+  const [role, setRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    setRole(getSessionRole());
+  }, []);
+
+
   const isLoggedIn = role !== null;
   const isAdmin = role === "admin";
 

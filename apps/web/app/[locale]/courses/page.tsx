@@ -128,9 +128,52 @@ function getCourses(l: string): Course[] {
       category: "Exam", difficulty: "Intermediate", source: "唐迟", isCommunity: false,
       resources: [
         { name: "方法论总结", url: "#" },
+
         { name: "历年真题", url: "#" },
       ],
     },
+
+    {
+      title: "大学英语四级（CET-4）备考指南",
+      desc: "系统备考大学英语四级考试，涵盖听力、阅读、写作和翻译四个模块。社区整理了高频词汇和真题解析。",
+      category: "Exam", difficulty: "Intermediate", source: "CampusForge", isCommunity: true,
+      resources: [
+        { name: "词汇手册", url: "#" },
+        { name: "真题库", url: "#" },
+        { name: "听力训练", url: "#" },
+      ],
+    },
+    {
+      title: "大学英语六级（CET-6）进阶攻略",
+      desc: "针对六级考试的进阶备考课程，重点攻克长难句、深度阅读和高级写作。",
+      category: "Exam", difficulty: "Advanced", source: "CampusForge", isCommunity: true,
+      resources: [
+        { name: "长难句解析", url: "#" },
+        { name: "写作模板", url: "#" },
+        { name: "模拟试题", url: "#" },
+      ],
+    },
+    {
+      title: "雅思（IELTS）备考全攻略",
+      desc: "雅思考试全面备考指南，包含听力、阅读、写作、口语四个科目的技巧和练习。适合计划出国留学的同学。",
+      category: "Exam", difficulty: "Advanced", source: "CampusForge", isCommunity: true,
+      resources: [
+        { name: "官方指南", url: "https://www.ielts.org" },
+        { name: "口语题库", url: "#" },
+        { name: "写作范文", url: "#" },
+      ],
+    },
+    {
+      title: "托福（TOEFL）高分突破",
+      desc: "托福考试备考课程，涵盖阅读、听力、口语、写作四大板块。提供真题练习和评分标准解析。",
+      category: "Exam", difficulty: "Advanced", source: "CampusForge", isCommunity: true,
+      resources: [
+        { name: "官方资源", url: "https://www.ets.org/toefl" },
+        { name: "真题练习", url: "#" },
+        { name: "口语模板", url: "#" },
+      ],
+    },
+
     {
       title: "LeetCode 刷题指南",
       desc: "社区整理的 LeetCode 高频题单，按难度和类型分类，附带多种语言题解。",
@@ -253,11 +296,55 @@ function getCourses(l: string): Course[] {
       category: "Exam", difficulty: "Intermediate", source: "唐迟", isCommunity: false,
       resources: [
         { name: "方法论总结", url: "#" },
+
         { name: "历年真题", url: "#" },
       ],
     },
+
+    {
+      title: "CET-4 Exam Preparation Guide",
+      desc: "Comprehensive preparation for the College English Test Band 4, covering listening, reading, writing, and translation. Community-curated vocabulary lists and past exam papers included.",
+      category: "Exam", difficulty: "Intermediate", source: "CampusForge", isCommunity: true,
+      resources: [
+        { name: "Vocabulary Handbook", url: "#" },
+        { name: "Past Papers", url: "#" },
+        { name: "Listening Practice", url: "#" },
+      ],
+    },
+    {
+      title: "CET-6 Advanced Strategies",
+      desc: "Advanced preparation for the College English Test Band 6, focusing on complex sentences, in-depth reading, and advanced writing techniques.",
+      category: "Exam", difficulty: "Advanced", source: "CampusForge", isCommunity: true,
+      resources: [
+        { name: "Sentence Analysis", url: "#" },
+        { name: "Writing Templates", url: "#" },
+        { name: "Mock Tests", url: "#" },
+      ],
+    },
+    {
+      title: "IELTS Complete Preparation",
+      desc: "Comprehensive IELTS preparation covering listening, reading, writing, and speaking modules. Ideal for students planning to study abroad.",
+      category: "Exam", difficulty: "Advanced", source: "CampusForge", isCommunity: true,
+      resources: [
+        { name: "Official Guide", url: "https://www.ielts.org" },
+        { name: "Speaking Question Bank", url: "#" },
+        { name: "Writing Samples", url: "#" },
+      ],
+    },
+    {
+      title: "TOEFL High Score Breakthrough",
+      desc: "TOEFL preparation course covering reading, listening, speaking, and writing sections. Includes practice tests and scoring criteria analysis.",
+      category: "Exam", difficulty: "Advanced", source: "CampusForge", isCommunity: true,
+      resources: [
+        { name: "Official Resources", url: "https://www.ets.org/toefl" },
+        { name: "Practice Tests", url: "#" },
+        { name: "Speaking Templates", url: "#" },
+      ],
+
+    },
     {
       title: "LeetCode 刷题指南",
+
       desc: "社区整理的 LeetCode 高频题单，按难度和类型分类，附带多种语言题解。",
       category: "Competition", difficulty: "Intermediate", source: "CampusForge", isCommunity: true,
       resources: [
