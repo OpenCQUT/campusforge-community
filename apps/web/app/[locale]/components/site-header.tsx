@@ -1,20 +1,21 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-
-const navItems = [
-  { href: "/", label: "Home" },
-  { href: "/apply", label: "Apply" },
-  { href: "/status", label: "Status" },
-  { href: "/resources", label: "Resources" },
-  { href: "/courses", label: "Courses" },
-  { href: "/policies", label: "Policies" },
-  { href: "/admin", label: "Admin" },
-];
+import { useTranslations } from "next-intl";
+import { Link, usePathname } from "@/i18n/navigation";
 
 export function SiteHeader() {
   const pathname = usePathname();
+  const t = useTranslations("nav");
+
+  const navItems = [
+    { href: "/", label: t("home") },
+    { href: "/apply", label: t("apply") },
+    { href: "/status", label: t("status") },
+    { href: "/resources", label: t("resources") },
+    { href: "/courses", label: t("courses") },
+    { href: "/policies", label: t("policies") },
+    { href: "/admin", label: t("admin") },
+  ];
 
   return (
     <header className="site-header">

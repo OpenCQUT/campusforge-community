@@ -1,0 +1,121 @@
+{
+  "common": {
+    "appName": "CampusForge",
+    "submit": "Submit",
+    "clear": "Clear",
+    "all": "All",
+    "review": "Review",
+    "getStarted": "Get Started",
+    "browseResources": "Browse Resources",
+    "requestInvitation": "Request Invitation",
+    "updated": "Updated {date}"
+  },
+  "nav": {
+    "home": "Home",
+    "apply": "Apply",
+    "status": "Status",
+    "resources": "Resources",
+    "courses": "Courses",
+    "policies": "Policies",
+    "admin": "Admin"
+  },
+  "home": {
+    "eyebrow": "School Open-Source Community",
+    "title": "Build, share, and learn together.",
+    "lede": "CampusForge connects students through open-source projects, shared resources, and collaborative courses. Request an invitation to join.",
+    "joinTitle": "Join the Community",
+    "joinDesc": "Submit your invitation request and start exploring resources, courses, and governance documents.",
+    "explore": "Explore",
+    "resourcesTitle": "Resources",
+    "resourcesDesc": "Guides, templates, tools, and internal documents shared by community members.",
+    "resourcesCount": "5 resource types",
+    "coursesTitle": "Courses",
+    "coursesDesc": "Self-paced paths, workshops, onboarding programs, and active cohorts.",
+    "coursesCount": "4 course types",
+    "policiesTitle": "Policies",
+    "policiesDesc": "Code of conduct, invitation rules, resource sharing policies, and security guidelines.",
+    "policiesCount": "5 policy documents"
+  },
+  "apply": {
+    "title": "Request Invitation",
+    "subtitle": "Submit your application to join the CampusForge community. An admin will review your request.",
+    "formTitle": "Application Form",
+    "email": "School Email",
+    "emailPlaceholder": "you@school.edu",
+    "studentId": "Student ID",
+    "studentIdPlaceholder": "2024001",
+    "department": "Department",
+    "departmentPlaceholder": "Computer Science",
+    "reason": "Why do you want to join?",
+    "reasonPlaceholder": "Tell us about your interests and what you hope to contribute...",
+    "whatNext": "What happens next?",
+    "whatNextDesc": "After you submit your application, an admin will review your request. You can check the status at any time.",
+    "step1": "Application submitted",
+    "step2": "Admin review",
+    "step3": "Decision notification",
+    "eligibility": "Eligibility",
+    "eligibilityDesc": "You need a valid school email address and a student ID. Applications are reviewed based on community guidelines."
+  },
+  "status": {
+    "title": "Application Status",
+    "subtitle": "Track the progress of your community invitation application.",
+    "details": "Application Details",
+    "appId": "Application ID",
+    "schoolEmail": "School Email",
+    "studentId": "Student ID",
+    "department": "Department",
+    "submitted": "Submitted",
+    "currentStatus": "Status",
+    "progress": "Progress",
+    "stepSubmitted": "Submitted",
+    "stepSubmittedDesc": "Your application has been received.",
+    "stepVerifying": "Verifying",
+    "stepVerifyingDesc": "School email and student ID are being verified.",
+    "stepReview": "Under Review",
+    "stepReviewDesc": "An admin is reviewing your application.",
+    "stepDecision": "Decision",
+    "stepDecisionDesc": "You will be notified of the final decision."
+  },
+  "resources": {
+    "title": "Resources",
+    "subtitle": "Guides, templates, tools, and documents shared by the community."
+  },
+  "courses": {
+    "title": "Courses",
+    "subtitle": "Learning paths, workshops, and active cohorts to help you grow."
+  },
+  "policies": {
+    "title": "Policies & Governance",
+    "subtitle": "Community rules, guidelines, and governance documents.",
+    "version": "Version {version}"
+  },
+  "admin": {
+    "title": "Admin",
+    "subtitle": "Manage applications, members, and community resources.",
+    "applicationReview": "Application Review",
+    "navApplications": "Applications",
+    "navMembers": "Members",
+    "navInvitations": "Invitations",
+    "navCourses": "Courses",
+    "navResources": "Resources",
+    "navAuditLog": "Audit Log",
+    "colApplicant": "Applicant",
+    "colEmail": "Email",
+    "colDepartment": "Department",
+    "colStatus": "Status",
+    "colSubmitted": "Submitted",
+    "colActions": "Actions",
+    "filterPending": "Pending",
+    "filterApproved": "Approved",
+    "filterRejected": "Rejected"
+  },
+  "statusLabel": {
+    "SUBMITTED": "Submitted",
+    "VERIFYING": "Verifying",
+    "UNDER_REVIEW": "Under Review",
+    "APPROVED": "Approved",
+    "REJECTED": "Rejected",
+    "NEEDS_INFO": "Needs Info",
+    "DRAFT": "Draft"
+  }
+}

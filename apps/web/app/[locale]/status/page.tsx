@@ -1,5 +1,9 @@
+import { useTranslations } from "next-intl";
+
 export default function StatusPage() {
-  // Mock data for display — will be replaced with API call
+  const t = useTranslations("status");
+  const ts = useTranslations("statusLabel");
+
   const application = {
     id: "demo-001",
     schoolEmail: "student@school.edu",
@@ -7,14 +11,13 @@ export default function StatusPage() {
     department: "Computer Science",
     status: "UNDER_REVIEW" as const,
     submittedAt: "2025-05-20",
-    reviewedAt: null as string | null,
   };
 
   const steps = [
-    { key: "SUBMITTED", label: "Submitted", description: "Your application has been received." },
-    { key: "VERIFYING", label: "Verifying", description: "School email and student ID are being verified." },
-    { key: "UNDER_REVIEW", label: "Under Review", description: "An admin is reviewing your application." },
-    { key: "APPROVED", label: "Decision", description: "You will be notified of the final decision." },
+    { key: "SUBMITTED", label: t("stepSubmitted"), description: t("stepSubmittedDesc") },
+    { key: "VERIFYING", label: t("stepVerifying"), description: t("stepVerifyingDesc") },
+    { key: "UNDER_REVIEW", label: t("stepReview"), description: t("stepReviewDesc") },
+    { key: "APPROVED", label: t("stepDecision"), description: t("stepDecisionDesc") },
   ];
 
   const statusOrder = ["SUBMITTED", "VERIFYING", "UNDER_REVIEW", "APPROVED"];
@@ -23,39 +26,35 @@ export default function StatusPage() {
   return (
     <main className="page">
       <div className="page-header">
-        <h1 className="page-title">Application Status</h1>
-        <p className="page-subtitle">
-          Track the progress of your community invitation application.
-        </p>
+        <h1 className="page-title">{t("title")}</h1>
+        <p className="page-subtitle">{t("subtitle")}</p>
       </div>
 
       <div className="grid-2">
-        {/* Application details */}
         <div className="glass-card" style={{ padding: 32 }}>
           <h2 style={{ fontSize: "1.1rem", fontWeight: 700, marginBottom: 20 }}>
-            Application Details
+            {t("details")}
           </h2>
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            <DetailRow label="Application ID" value={application.id} />
-            <DetailRow label="School Email" value={application.schoolEmail} />
-            <DetailRow label="Student ID" value={application.studentId} />
-            <DetailRow label="Department" value={application.department} />
-            <DetailRow label="Submitted" value={application.submittedAt} />
+            <DetailRow label={t("appId")} value={application.id} />
+            <DetailRow label={t("schoolEmail")} value={application.schoolEmail} />
+            <DetailRow label={t("studentId")} value={application.studentId} />
+            <DetailRow label={t("department")} value={application.department} />
+            <DetailRow label={t("submitted")} value={application.submittedAt} />
             <DetailRow
-              label="Status"
+              label={t("currentStatus")}
               value={
                 <span className={`status status-${application.status.toLowerCase().replace("_", "-")}`}>
-                  {application.status.replace("_", " ")}
+                  {ts(application.status)}
                 </span>
               }
             />
           </div>
         </div>
 
-        {/* Timeline */}
         <div className="glass-card" style={{ padding: 32 }}>
           <h2 style={{ fontSize: "1.1rem", fontWeight: 700, marginBottom: 20 }}>
-            Progress
+            {t("progress")}
           </h2>
           <div className="status-timeline">
             {steps.map((step, i) => {

@@ -1,0 +1,121 @@
+{
+  "common": {
+    "appName": "CampusForge",
+    "submit": "提交",
+    "clear": "清除",
+    "all": "全部",
+    "review": "审核",
+    "getStarted": "开始使用",
+    "browseResources": "浏览资源",
+    "requestInvitation": "申请邀请",
+    "updated": "更新于 {date}"
+  },
+  "nav": {
+    "home": "首页",
+    "apply": "申请",
+    "status": "状态",
+    "resources": "资源",
+    "courses": "课程",
+    "policies": "制度",
+    "admin": "管理"
+  },
+  "home": {
+    "eyebrow": "校园开源社区",
+    "title": "一起构建、分享与学习。",
+    "lede": "CampusForge 通过开源项目、共享资源和协作课程连接学生。提交邀请申请加入我们。",
+    "joinTitle": "加入社区",
+    "joinDesc": "提交邀请申请，开始探索资源、课程和治理文档。",
+    "explore": "探索",
+    "resourcesTitle": "资源中心",
+    "resourcesDesc": "社区成员分享的指南、模板、工具和内部文档。",
+    "resourcesCount": "5 种资源类型",
+    "coursesTitle": "课程中心",
+    "coursesDesc": "自学路径、工作坊、入职培训和活跃的课程组。",
+    "coursesCount": "4 种课程类型",
+    "policiesTitle": "制度治理",
+    "policiesDesc": "行为准则、邀请规则、资源共享政策和安全指南。",
+    "policiesCount": "5 份制度文档"
+  },
+  "apply": {
+    "title": "申请邀请",
+    "subtitle": "提交加入 CampusForge 社区的申请，管理员将审核您的请求。",
+    "formTitle": "申请表",
+    "email": "学校邮箱",
+    "emailPlaceholder": "you@school.edu",
+    "studentId": "学号",
+    "studentIdPlaceholder": "2024001",
+    "department": "院系",
+    "departmentPlaceholder": "计算机科学",
+    "reason": "为什么想加入？",
+    "reasonPlaceholder": "请介绍你的兴趣和希望做出的贡献……",
+    "whatNext": "接下来会发生什么？",
+    "whatNextDesc": "提交申请后，管理员将审核您的请求。您可以随时查看状态。",
+    "step1": "申请已提交",
+    "step2": "管理员审核",
+    "step3": "结果通知",
+    "eligibility": "申请条件",
+    "eligibilityDesc": "需要有效的学校邮箱和学号。申请将根据社区准则进行审核。"
+  },
+  "status": {
+    "title": "申请状态",
+    "subtitle": "跟踪您的社区邀请申请进度。",
+    "details": "申请详情",
+    "appId": "申请编号",
+    "schoolEmail": "学校邮箱",
+    "studentId": "学号",
+    "department": "院系",
+    "submitted": "提交时间",
+    "currentStatus": "当前状态",
+    "progress": "进度",
+    "stepSubmitted": "已提交",
+    "stepSubmittedDesc": "您的申请已收到。",
+    "stepVerifying": "验证中",
+    "stepVerifyingDesc": "正在验证学校邮箱和学号。",
+    "stepReview": "审核中",
+    "stepReviewDesc": "管理员正在审核您的申请。",
+    "stepDecision": "结果",
+    "stepDecisionDesc": "您将收到最终结果通知。"
+  },
+  "resources": {
+    "title": "资源中心",
+    "subtitle": "社区成员分享的指南、模板、工具和文档。"
+  },
+  "courses": {
+    "title": "课程中心",
+    "subtitle": "帮助你成长的学习路径、工作坊和活跃课程组。"
+  },
+  "policies": {
+    "title": "制度与治理",
+    "subtitle": "社区规则、准则和治理文档。",
+    "version": "版本 {version}"
+  },
+  "admin": {
+    "title": "管理后台",
+    "subtitle": "管理申请、成员和社区资源。",
+    "applicationReview": "申请审核",
+    "navApplications": "申请管理",
+    "navMembers": "成员管理",
+    "navInvitations": "邀请管理",
+    "navCourses": "课程管理",
+    "navResources": "资源管理",
+    "navAuditLog": "审计日志",
+    "colApplicant": "申请人",
+    "colEmail": "邮箱",
+    "colDepartment": "院系",
+    "colStatus": "状态",
+    "colSubmitted": "提交时间",
+    "colActions": "操作",
+    "filterPending": "待审核",
+    "filterApproved": "已通过",
+    "filterRejected": "已拒绝"
+  },
+  "statusLabel": {
+    "SUBMITTED": "已提交",
+    "VERIFYING": "验证中",
+    "UNDER_REVIEW": "审核中",
+    "APPROVED": "已通过",
+    "REJECTED": "已拒绝",
+    "NEEDS_INFO": "需补充",
+    "DRAFT": "草稿"
+  }
+}
