@@ -71,7 +71,11 @@
   },
   "status": {
     "title": "Application Status",
-    "subtitle": "Track the progress of your community invitation application.",
+    "subtitle": "Enter your school email to look up your application.",
+    "searchLabel": "School Email",
+    "searchPlaceholder": "you@school.edu",
+    "searchButton": "Look Up",
+    "notFound": "No application found for this email.",
     "details": "Application Details",
     "appId": "Application ID",
     "schoolEmail": "School Email",

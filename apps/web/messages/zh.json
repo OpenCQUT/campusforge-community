@@ -71,7 +71,11 @@
   },
   "status": {
     "title": "申请状态",
-    "subtitle": "跟踪您的社区邀请申请进度。",
+    "subtitle": "输入学校邮箱查询您的申请。",
+    "searchLabel": "学校邮箱",
+    "searchPlaceholder": "you@school.edu",
+    "searchButton": "查询",
+    "notFound": "未找到该邮箱对应的申请记录。",
     "details": "申请详情",
     "appId": "申请编号",
     "schoolEmail": "学校邮箱",

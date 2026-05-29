@@ -1,17 +1,51 @@
+"use client";
+
+import { useState } from "react";
 import { useTranslations } from "next-intl";
+
+interface Application {
+  id: string;
+  schoolEmail: string;
+  studentId: string;
+  department: string;
+  status: "SUBMITTED" | "VERIFYING" | "UNDER_REVIEW" | "APPROVED" | "REJECTED" | "NEEDS_INFO";
+  submittedAt: string;
+}
+
+// Demo data — will be replaced with API call
+const MOCK_DB: Record<string, Application> = {
+  "student@school.edu": {
+    id: "demo-001",
+    schoolEmail: "student@school.edu",
+    studentId: "2024001",
+    department: "Computer Science",
+    status: "UNDER_REVIEW",
+    submittedAt: "2025-05-20",
+  },
+  "liming@school.edu": {
+    id: "demo-002",
+    schoolEmail: "liming@school.edu",
+    studentId: "2024002",
+    department: "Electrical Engineering",
+    status: "APPROVED",
+    submittedAt: "2025-05-18",
+  },
+};
 
 export default function StatusPage() {
   const t = useTranslations("status");
   const ts = useTranslations("statusLabel");
 
-  const application = {
-    id: "demo-001",
-    schoolEmail: "student@school.edu",
-    studentId: "2024001",
-    department: "Computer Science",
-    status: "UNDER_REVIEW" as const,
-    submittedAt: "2025-05-20",
-  };
+  const [email, setEmail] = useState("");
+  const [result, setResult] = useState<Application | null | "not-found">(
+    null,
+  );
+
+  function handleSearch(e: React.FormEvent) {
+    e.preventDefault();
+    const found = MOCK_DB[email.trim().toLowerCase()];
+    setResult(found ?? "not-found");
+  }
 
   const steps = [
     { key: "SUBMITTED", label: t("stepSubmitted"), description: t("stepSubmittedDesc") },
@@ -20,9 +54,6 @@ export default function StatusPage() {
     { key: "APPROVED", label: t("stepDecision"), description: t("stepDecisionDesc") },
   ];
 
-  const statusOrder = ["SUBMITTED", "VERIFYING", "UNDER_REVIEW", "APPROVED"];
-  const currentIndex = statusOrder.indexOf(application.status);
-
   return (
     <main className="page">
       <div className="page-header">
@@ -30,62 +61,145 @@ export default function StatusPage() {
         <p className="page-subtitle">{t("subtitle")}</p>
       </div>
 
-      <div className="grid-2">
-        <div className="glass-card" style={{ padding: 32 }}>
-          <h2 style={{ fontSize: "1.1rem", fontWeight: 700, marginBottom: 20 }}>
-            {t("details")}
-          </h2>
-          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            <DetailRow label={t("appId")} value={application.id} />
-            <DetailRow label={t("schoolEmail")} value={application.schoolEmail} />
-            <DetailRow label={t("studentId")} value={application.studentId} />
-            <DetailRow label={t("department")} value={application.department} />
-            <DetailRow label={t("submitted")} value={application.submittedAt} />
-            <DetailRow
-              label={t("currentStatus")}
-              value={
-                <span className={`status status-${application.status.toLowerCase().replace("_", "-")}`}>
-                  {ts(application.status)}
-                </span>
-              }
-            />
-          </div>
+      {/* Search form */}
+      <form
+        onSubmit={handleSearch}
+        style={{
+          display: "flex",
+          gap: 12,
+          alignItems: "flex-end",
+          maxWidth: 520,
+          marginBottom: 32,
+        }}
+      >
+        <div className="field" style={{ flex: 1 }}>
+          <label htmlFor="lookup-email">{t("searchLabel")}</label>
+          <input
+            id="lookup-email"
+            type="email"
+            placeholder={t("searchPlaceholder")}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
         </div>
+        <button type="submit" className="btn btn-primary">
+          {t("searchButton")}
+        </button>
+      </form>
 
-        <div className="glass-card" style={{ padding: 32 }}>
-          <h2 style={{ fontSize: "1.1rem", fontWeight: 700, marginBottom: 20 }}>
-            {t("progress")}
-          </h2>
-          <div className="status-timeline">
-            {steps.map((step, i) => {
-              const isCompleted = i < currentIndex;
-              const isActive = i === currentIndex;
-              return (
-                <div
-                  key={step.key}
-                  className={`timeline-step ${isCompleted ? "completed" : ""} ${isActive ? "active" : ""}`}
-                >
-                  <div className="timeline-dot">
-                    {isCompleted ? "\u2713" : i + 1}
+      {/* Not found */}
+      {result === "not-found" && (
+        <div
+          className="glass-card"
+          style={{
+            padding: 24,
+            maxWidth: 520,
+            borderColor: "rgba(255,95,125,0.3)",
+          }}
+        >
+          <p style={{ color: "var(--danger)", fontSize: "0.9rem" }}>
+            {t("notFound")}
+          </p>
+        </div>
+      )}
+
+      {/* Result */}
+      {result && result !== "not-found" && (
+        <div className="grid-2">
+          <div className="glass-card" style={{ padding: 32 }}>
+            <h2
+              style={{
+                fontSize: "1.1rem",
+                fontWeight: 700,
+                marginBottom: 20,
+              }}
+            >
+              {t("details")}
+            </h2>
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: 14 }}
+            >
+              <DetailRow label={t("appId")} value={result.id} />
+              <DetailRow label={t("schoolEmail")} value={result.schoolEmail} />
+              <DetailRow label={t("studentId")} value={result.studentId} />
+              <DetailRow label={t("department")} value={result.department} />
+              <DetailRow label={t("submitted")} value={result.submittedAt} />
+              <DetailRow
+                label={t("currentStatus")}
+                value={
+                  <span
+                    className={`status status-${result.status.toLowerCase().replace("_", "-")}`}
+                  >
+                    {ts(result.status)}
+                  </span>
+                }
+              />
+            </div>
+          </div>
+
+          <div className="glass-card" style={{ padding: 32 }}>
+            <h2
+              style={{
+                fontSize: "1.1rem",
+                fontWeight: 700,
+                marginBottom: 20,
+              }}
+            >
+              {t("progress")}
+            </h2>
+            <div className="status-timeline">
+              {steps.map((step, i) => {
+                const statusOrder = [
+                  "SUBMITTED",
+                  "VERIFYING",
+                  "UNDER_REVIEW",
+                  "APPROVED",
+                ];
+                const currentIndex = statusOrder.indexOf(result.status);
+                const isCompleted = i < currentIndex;
+                const isActive = i === currentIndex;
+                return (
+                  <div
+                    key={step.key}
+                    className={`timeline-step ${isCompleted ? "completed" : ""} ${isActive ? "active" : ""}`}
+                  >
+                    <div className="timeline-dot">
+                      {isCompleted ? "\u2713" : i + 1}
+                    </div>
+                    <div className="timeline-content">
+                      <h4>{step.label}</h4>
+                      <p>{step.description}</p>
+                    </div>
                   </div>
-                  <div className="timeline-content">
-                    <h4>{step.label}</h4>
-                    <p>{step.description}</p>
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </main>
   );
 }
 
-function DetailRow({ label, value }: { label: string; value: React.ReactNode }) {
+function DetailRow({
+  label,
+  value,
+}: {
+  label: string;
+  value: React.ReactNode;
+}) {
   return (
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-      <span style={{ color: "var(--text-500)", fontSize: "0.85rem" }}>{label}</span>
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+      }}
+    >
+      <span style={{ color: "var(--text-500)", fontSize: "0.85rem" }}>
+        {label}
+      </span>
       <span style={{ fontSize: "0.88rem", fontWeight: 500 }}>{value}</span>
     </div>
   );
