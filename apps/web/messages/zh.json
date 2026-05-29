@@ -76,7 +76,8 @@
     "submitAnother": "再次提交",
     "fieldRequired": "此项为必填。",
     "reasonTooShort": "请至少填写 10 个字符。",
-    "emailInvalid": "请输入有效的邮箱地址。"
+    "emailInvalid": "请输入有效的邮箱地址。",
+    "duplicateEmail": "该邮箱已存在申请记录。"
   },
   "status": {
     "title": "申请状态",
@@ -174,7 +175,6 @@
     "colCode": "邀请码",
     "colExpires": "过期时间",
     "colUsed": "已使用",
-    "colApplicant": "申请人",
     "revoke": "撤销",
     "revoked": "邀请已撤销",
     "noInvitations": "没有找到邀请记录。",

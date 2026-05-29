@@ -35,7 +35,20 @@ export default function ApplyPage() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!validate()) return;
-    addApplication({ email: email.trim(), studentId: studentId.trim(), department: department.trim(), reason: reason.trim() });
+    try {
+      addApplication({
+        email: email.trim(),
+        studentId: studentId.trim(),
+        department: department.trim(),
+        reason: reason.trim(),
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message === "duplicate") {
+        setErrors({ email: t("duplicateEmail") });
+        return;
+      }
+      throw error;
+    }
     setSubmitted(true);
   }
 

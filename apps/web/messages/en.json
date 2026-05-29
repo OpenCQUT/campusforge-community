@@ -76,7 +76,8 @@
     "submitAnother": "Submit Another",
     "fieldRequired": "This field is required.",
     "reasonTooShort": "Please write at least 10 characters.",
-    "emailInvalid": "Please enter a valid email address."
+    "emailInvalid": "Please enter a valid email address.",
+    "duplicateEmail": "An application already exists for this email."
   },
   "status": {
     "title": "Application Status",
@@ -174,7 +175,6 @@
     "colCode": "Code",
     "colExpires": "Expires",
     "colUsed": "Used",
-    "colApplicant": "Applicant",
     "revoke": "Revoke",
     "revoked": "Invitation revoked",
     "noInvitations": "No invitations found.",

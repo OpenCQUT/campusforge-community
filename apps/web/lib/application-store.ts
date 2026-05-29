@@ -70,4 +70,5 @@ export function updateApplication(id: string, updates: Partial<Pick<StoredApplic
   const existing = all[idx];
   if (!existing) return;
   all[idx] = { ...existing, ...updates };
+  writeAll(all);
 }
