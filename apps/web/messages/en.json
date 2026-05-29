@@ -106,7 +106,19 @@
   },
   "courses": {
     "title": "Courses",
-    "subtitle": "Learning paths, workshops, and active cohorts to help you grow."
+    "subtitle": "Curated open courses, community tutorials, and learning paths.",
+    "filterAll": "All",
+    "filterProgramming": "Programming",
+    "filterDesign": "Design",
+    "filterData": "Data Science",
+    "filterTools": "Tools & DevOps",
+    "filterCommunity": "Community",
+    "resources": "Resources",
+    "resourcesCount": "{count} resources",
+    "externalLink": "External",
+    "communityMade": "Community",
+    "viewResources": "View Resources",
+    "noCourses": "No courses found."
   },
   "policies": {
     "title": "Policies & Governance",

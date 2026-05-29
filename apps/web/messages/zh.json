@@ -106,7 +106,19 @@
   },
   "courses": {
     "title": "课程中心",
-    "subtitle": "帮助你成长的学习路径、工作坊和活跃课程组。"
+    "subtitle": "精选公开课、社区教程和学习路径。",
+    "filterAll": "全部",
+    "filterProgramming": "编程",
+    "filterDesign": "设计",
+    "filterData": "数据科学",
+    "filterTools": "工具与运维",
+    "filterCommunity": "社区出品",
+    "resources": "配套资源",
+    "resourcesCount": "{count} 个资源",
+    "externalLink": "外部",
+    "communityMade": "社区出品",
+    "viewResources": "查看资源",
+    "noCourses": "没有找到课程。"
   },
   "policies": {
     "title": "制度与治理",
