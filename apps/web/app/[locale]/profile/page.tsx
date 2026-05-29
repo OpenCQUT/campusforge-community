@@ -29,12 +29,70 @@ function getSessionRole(): string | null {
 
 // ─── GitHub types ───────────────────────────────────────────────────────────
 
+interface ContributionDay {
+  date: string;
+  count: number;
+  level: 0 | 1 | 2 | 3 | 4;
+}
+
+interface ContributionWeek {
+  days: ContributionDay[];
+}
+
 interface GitHubStats {
-  commits: number;
-  prs: number;
-  issues: number;
-  repos: { name: string; description: string; stars: number; language: string; url: string }[];
-  recentActivity: { type: string; repo: string; date: string }[];
+  totalContributions: number;
+  contributionWeeks: ContributionWeek[];
+  orgStats: {
+    name: string;
+    prs: number;
+    issues: number;
+  }[];
+  ossContributions: {
+    org: string;
+    prs: number;
+    issues: number;
+  }[];
+
+}
+
+
+// ─── Contribution Graph ────────────────────────────────────────────────────
+
+const LEVEL_COLORS = [
+  "var(--bg-800)",
+  "rgba(125,150,255,0.2)",
+  "rgba(125,150,255,0.4)",
+  "rgba(125,150,255,0.6)",
+  "rgba(125,150,255,0.8)",
+];
+
+function ContributionGraph({ weeks }: { weeks: ContributionWeek[] }) {
+  const cellSize = 12;
+  const gap = 2;
+  const width = weeks.length * (cellSize + gap);
+  const height = 7 * (cellSize + gap);
+
+  return (
+    <div style={{ overflowX: "auto", marginBottom: 16 }}>
+      <svg width={width} height={height} style={{ display: "block" }}>
+        {weeks.map((week, wi) =>
+          week.days.map((day, di) => (
+            <rect
+              key={`${wi}-${di}`}
+              x={wi * (cellSize + gap)}
+              y={di * (cellSize + gap)}
+              width={cellSize}
+              height={cellSize}
+              rx={2}
+              fill={LEVEL_COLORS[day.level]}
+            >
+              <title>{`${day.date}: ${day.count} contributions`}</title>
+            </rect>
+          ))
+        )}
+      </svg>
+    </div>
+  );
 }
 
 
@@ -72,49 +130,63 @@ export default function ProfilePage() {
     setGhLoading(true);
     setGhError("");
     try {
-      // Fetch PRs, Issues, and user repos in parallel
-      const [prRes, issueRes, repoRes, eventRes] = await Promise.all([
-        fetch(`https://api.github.com/search/issues?q=author:${username}+type:pr&per_page=1`),
-        fetch(`https://api.github.com/search/issues?q=author:${username}+type:issue&per_page=1`),
-        fetch(`https://api.github.com/users/${username}/repos?sort=updated&per_page=5`),
-        fetch(`https://api.github.com/users/${username}/events/public?per_page=10`),
+      // Major open source organizations to track
+      const majorOrgs = ["facebook", "microsoft", "google", "apache", "vercel", "nextui-org", "shadcn-ui"];
+
+      // Fetch contributions and org stats in parallel
+      const [contribRes, openCqutPrRes, openCqutIssueRes, ...orgResults] = await Promise.all([
+        fetch(`https://github-contributions-api.jogruber.de/v4/${username}?y=last`),
+        fetch(`https://api.github.com/search/issues?q=author:${username}+type:pr+org:OpenCQUT&per_page=1`),
+        fetch(`https://api.github.com/search/issues?q=author:${username}+type:issue+org:OpenCQUT&per_page=1`),
+        ...majorOrgs.flatMap(org => [
+          fetch(`https://api.github.com/search/issues?q=author:${username}+type:pr+org:${org}&per_page=1`),
+          fetch(`https://api.github.com/search/issues?q=author:${username}+type:issue+org:${org}&per_page=1`),
+        ]),
       ]);
 
-      const prData = prRes.ok ? await prRes.json() : { total_count: 0 };
-      const issueData = issueRes.ok ? await issueRes.json() : { total_count: 0 };
-      const repoData = repoRes.ok ? await repoRes.json() : [];
-      const eventData = eventRes.ok ? await eventRes.json() : [];
+      const contribData = contribRes.ok ? await contribRes.json() : { contributions: [], total: { lastYear: 0 } };
+      const openCqutPrData = openCqutPrRes.ok ? await openCqutPrRes.json() : { total_count: 0 };
+      const openCqutIssueData = openCqutIssueRes.ok ? await openCqutIssueRes.json() : { total_count: 0 };
 
-      // Count commits from PushEvent
-      let commitCount = 0;
-      const recentActivity: GitHubStats["recentActivity"] = [];
-      for (const event of eventData) {
-        if (event.type === "PushEvent") {
-          commitCount += event.payload?.commits?.length ?? 0;
-        }
-        recentActivity.push({
-          type: event.type.replace("Event", ""),
-          repo: event.repo?.name ?? "",
-          date: event.created_at?.slice(0, 10) ?? "",
+      // Parse contribution weeks from the API response
+      const contributionWeeks: ContributionWeek[] = [];
+      const contributions = contribData.contributions ?? [];
+      for (let i = 0; i < contributions.length; i += 7) {
+        const weekDays = contributions.slice(i, i + 7);
+        contributionWeeks.push({
+          days: weekDays.map((day: { date: string; count: number; level: number }) => ({
+            date: day.date,
+            count: day.count,
+            level: Math.min(4, Math.max(0, day.level)) as 0 | 1 | 2 | 3 | 4,
+          })),
         });
       }
 
-      const repos = Array.isArray(repoData)
-        ? repoData.map((r: { name: string; description: string | null; stargazers_count: number; language: string | null; html_url: string }) => ({
-            name: r.name,
-            description: r.description ?? "",
-            stars: r.stargazers_count,
-            language: r.language ?? "",
-            url: r.html_url,
-          }))
-        : [];
+      // Parse major org contributions
+      const ossContributions: GitHubStats["ossContributions"] = [];
+      for (let i = 0; i < majorOrgs.length; i++) {
+
+        const org = majorOrgs[i]!;
+        const prRes = orgResults[i * 2];
+        const issueRes = orgResults[i * 2 + 1];
+        const prData = prRes?.ok ? await prRes.json() : { total_count: 0 };
+        const issueData = issueRes?.ok ? await issueRes.json() : { total_count: 0 };
+        const prs = prData.total_count ?? 0;
+        const issues = issueData.total_count ?? 0;
+        if (prs > 0 || issues > 0) {
+          ossContributions.push({ org, prs, issues });
+        }
+      }
 
       setGhStats({
-        commits: commitCount,
-        prs: prData.total_count ?? 0,
-        issues: issueData.total_count ?? 0,
-        repos,
-        recentActivity,
+        totalContributions: contribData.total?.lastYear ?? 0,
+        contributionWeeks,
+        orgStats: [{
+          name: "OpenCQUT",
+          prs: openCqutPrData.total_count ?? 0,
+          issues: openCqutIssueData.total_count ?? 0,
+        }],
+        ossContributions,
       });
     } catch {
       setGhError("Failed to fetch GitHub data.");
@@ -122,6 +194,7 @@ export default function ProfilePage() {
       setGhLoading(false);
     }
   }, []);
+
 
   // Fetch on mount if username exists
   useEffect(() => {
@@ -215,49 +288,50 @@ export default function ProfilePage() {
             </div>
           ) : ghStats ? (
             <>
-              {/* Stats row */}
-              <div style={{ display: "flex", gap: 24, marginBottom: 20 }}>
-                <StatBlock label={t("commits")} value={ghStats.commits} />
-                <StatBlock label={t("pullRequests")} value={ghStats.prs} />
-                <StatBlock label={t("issues")} value={ghStats.issues} />
+              {/* Total contributions */}
+              <div style={{ marginBottom: 20 }}>
+                <StatBlock label={t("totalContributions")} value={ghStats.totalContributions} />
               </div>
 
-              {/* Top repos */}
-              {ghStats.repos.length > 0 && (
+              {/* Contribution graph */}
+              <div style={{ marginBottom: 24 }}>
+                <h3 style={{ fontSize: "0.82rem", fontWeight: 600, color: "var(--text-500)", marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                  {t("contributionGraph")}
+                </h3>
+                <ContributionGraph weeks={ghStats.contributionWeeks} />
+              </div>
+
+              {/* OpenCQUT contributions */}
+              {ghStats.orgStats.length > 0 && ghStats.orgStats.some(o => o.prs > 0 || o.issues > 0) && (
                 <div style={{ marginBottom: 20 }}>
                   <h3 style={{ fontSize: "0.82rem", fontWeight: 600, color: "var(--text-500)", marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                    {t("topRepos")}
+                    {t("openCqutContributions")}
                   </h3>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                    {ghStats.repos.map((r) => (
-                      <a key={r.name} href={r.url} target="_blank" rel="noopener noreferrer"
-                        style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", borderRadius: "var(--radius-sm)", border: "1px solid var(--glass-border)", color: "var(--text-300)", fontSize: "0.85rem", transition: "border-color 0.15s" }}
-                        onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(125,150,255,0.3)"; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--glass-border)"; }}
-                      >
-                        <div>
-                          <span style={{ fontWeight: 600 }}>{r.name}</span>
-                          {r.language && <span className="tag tag-muted" style={{ fontSize: "0.68rem", marginLeft: 8 }}>{r.language}</span>}
-                          {r.description && <p style={{ color: "var(--text-500)", fontSize: "0.78rem", margin: "4px 0 0" }}>{r.description}</p>}
-                        </div>
-                        <span style={{ fontSize: "0.78rem", color: "var(--text-500)", whiteSpace: "nowrap" }}>&#9733; {r.stars}</span>
-                      </a>
+                  <div style={{ display: "flex", gap: 24 }}>
+                    {ghStats.orgStats.map((org) => (
+                      <div key={org.name} style={{ display: "flex", gap: 24 }}>
+                        <StatBlock label={t("pullRequests")} value={org.prs} />
+                        <StatBlock label={t("issues")} value={org.issues} />
+                      </div>
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* Recent activity */}
-              {ghStats.recentActivity.length > 0 && (
+              {/* Major open source contributions */}
+              {ghStats.ossContributions.length > 0 && (
                 <div style={{ marginBottom: 16 }}>
                   <h3 style={{ fontSize: "0.82rem", fontWeight: 600, color: "var(--text-500)", marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                    {t("activity")}
+                    {t("ossContributions")}
                   </h3>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                    {ghStats.recentActivity.slice(0, 5).map((a, i) => (
-                      <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.82rem", color: "var(--text-300)" }}>
-                        <span><span style={{ fontWeight: 600 }}>{a.type}</span> on {a.repo}</span>
-                        <span style={{ color: "var(--text-500)", fontSize: "0.75rem" }}>{a.date}</span>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    {ghStats.ossContributions.map((org) => (
+                      <div key={org.org} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", borderRadius: "var(--radius-sm)", border: "1px solid var(--glass-border)" }}>
+                        <span style={{ fontWeight: 600, fontSize: "0.88rem" }}>{org.org}</span>
+                        <div style={{ display: "flex", gap: 16 }}>
+                          <span style={{ fontSize: "0.82rem", color: "var(--text-500)" }}>{org.prs} PRs</span>
+                          <span style={{ fontSize: "0.82rem", color: "var(--text-500)" }}>{org.issues} Issues</span>
+                        </div>
                       </div>
                     ))}
                   </div>
