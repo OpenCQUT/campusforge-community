@@ -113,6 +113,8 @@
     "filterData": "Data Science",
     "filterTools": "Tools & DevOps",
     "filterCommunity": "Community",
+    "filterExam": "Exam Prep",
+    "filterCompetition": "Competitions",
     "resources": "Resources",
     "resourcesCount": "{count} resources",
     "externalLink": "External",

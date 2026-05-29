@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
-type Category = "Programming" | "Design" | "Data" | "Tools" | "Community";
+type Category = "Programming" | "Design" | "Data" | "Tools" | "Community" | "Exam" | "Competition";
 
 interface CourseResource {
   name: string;
@@ -26,6 +26,8 @@ const categoryColors: Record<Category, string> = {
   Data: "tag-cyan",
   Tools: "tag-muted",
   Community: "tag-success",
+  Exam: "tag-danger",
+  Competition: "tag-blue",
 };
 
 const difficultyColors: Record<string, string> = {
@@ -110,6 +112,55 @@ function getCourses(l: string): Course[] {
         { name: "社区学习小组", url: "#" },
       ],
     },
+    {
+      title: "考研数学：张宇高数 18 讲",
+      desc: "国内考研数学经典辅导课程，涵盖高等数学核心考点。社区整理了配套笔记和真题解析。",
+      category: "Exam", difficulty: "Advanced", source: "张宇", isCommunity: false,
+      resources: [
+        { name: "课程介绍", url: "#" },
+        { name: "社区笔记", url: "#" },
+        { name: "真题库", url: "#" },
+      ],
+    },
+    {
+      title: "考研英语：唐迟阅读方法论",
+      desc: "考研英语阅读理解专项训练，系统讲解解题思路和技巧。",
+      category: "Exam", difficulty: "Intermediate", source: "唐迟", isCommunity: false,
+      resources: [
+        { name: "方法论总结", url: "#" },
+        { name: "历年真题", url: "#" },
+      ],
+    },
+    {
+      title: "LeetCode 刷题指南",
+      desc: "社区整理的 LeetCode 高频题单，按难度和类型分类，附带多种语言题解。",
+      category: "Competition", difficulty: "Intermediate", source: "CampusForge", isCommunity: true,
+      resources: [
+        { name: "题单", url: "#" },
+        { name: "题解仓库", url: "#" },
+        { name: "每周竞赛讨论", url: "#" },
+      ],
+    },
+    {
+      title: "ACM-ICPC 竞赛入门",
+      desc: "算法竞赛入门路径，从基础数据结构到高级算法。社区提供训练计划和模拟赛。",
+      category: "Competition", difficulty: "Advanced", source: "CampusForge", isCommunity: true,
+      resources: [
+        { name: "训练计划", url: "#" },
+        { name: "模拟赛", url: "#" },
+        { name: "题解合集", url: "#" },
+      ],
+    },
+    {
+      title: "数学建模竞赛备赛",
+      desc: "全国大学生数学建模竞赛备赛资源，包含常用模型、MATLAB/Python 代码模板和历年优秀论文。",
+      category: "Competition", difficulty: "Intermediate", source: "CampusForge", isCommunity: true,
+      resources: [
+        { name: "模型手册", url: "#" },
+        { name: "代码模板", url: "#" },
+        { name: "优秀论文", url: "#" },
+      ],
+    },
   ];
   return [
     {
@@ -186,6 +237,55 @@ function getCourses(l: string): Course[] {
         { name: "Community Study Group", url: "#" },
       ],
     },
+    {
+      title: "考研数学：张宇高数 18 讲",
+      desc: "国内考研数学经典辅导课程，涵盖高等数学核心考点。社区整理了配套笔记和真题解析。",
+      category: "Exam", difficulty: "Advanced", source: "张宇", isCommunity: false,
+      resources: [
+        { name: "课程介绍", url: "#" },
+        { name: "社区笔记", url: "#" },
+        { name: "真题库", url: "#" },
+      ],
+    },
+    {
+      title: "考研英语：唐迟阅读方法论",
+      desc: "考研英语阅读理解专项训练，系统讲解解题思路和技巧。",
+      category: "Exam", difficulty: "Intermediate", source: "唐迟", isCommunity: false,
+      resources: [
+        { name: "方法论总结", url: "#" },
+        { name: "历年真题", url: "#" },
+      ],
+    },
+    {
+      title: "LeetCode 刷题指南",
+      desc: "社区整理的 LeetCode 高频题单，按难度和类型分类，附带多种语言题解。",
+      category: "Competition", difficulty: "Intermediate", source: "CampusForge", isCommunity: true,
+      resources: [
+        { name: "题单", url: "#" },
+        { name: "题解仓库", url: "#" },
+        { name: "每周竞赛讨论", url: "#" },
+      ],
+    },
+    {
+      title: "ACM-ICPC 竞赛入门",
+      desc: "算法竞赛入门路径，从基础数据结构到高级算法。社区提供训练计划和模拟赛。",
+      category: "Competition", difficulty: "Advanced", source: "CampusForge", isCommunity: true,
+      resources: [
+        { name: "训练计划", url: "#" },
+        { name: "模拟赛", url: "#" },
+        { name: "题解合集", url: "#" },
+      ],
+    },
+    {
+      title: "数学建模竞赛备赛",
+      desc: "全国大学生数学建模竞赛备赛资源，包含常用模型、MATLAB/Python 代码模板和历年优秀论文。",
+      category: "Competition", difficulty: "Intermediate", source: "CampusForge", isCommunity: true,
+      resources: [
+        { name: "模型手册", url: "#" },
+        { name: "代码模板", url: "#" },
+        { name: "优秀论文", url: "#" },
+      ],
+    },
   ];
 }
 
@@ -195,6 +295,8 @@ const CATEGORIES: { key: Category | null; labelKey: string }[] = [
   { key: "Design", labelKey: "filterDesign" },
   { key: "Data", labelKey: "filterData" },
   { key: "Tools", labelKey: "filterTools" },
+  { key: "Exam", labelKey: "filterExam" },
+  { key: "Competition", labelKey: "filterCompetition" },
   { key: "Community", labelKey: "filterCommunity" },
 ];
 

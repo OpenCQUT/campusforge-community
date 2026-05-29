@@ -113,6 +113,8 @@
     "filterData": "数据科学",
     "filterTools": "工具与运维",
     "filterCommunity": "社区出品",
+    "filterExam": "考研",
+    "filterCompetition": "竞赛",
     "resources": "配套资源",
     "resourcesCount": "{count} 个资源",
     "externalLink": "外部",
