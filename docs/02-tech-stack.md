@@ -37,6 +37,15 @@
 - 支持迁移、seed、类型化查询。
 - 与 TypeScript 后端一致性较好。
 
+## 国际化：next-intl
+
+选择 next-intl 的原因：
+
+- 与 Next.js App Router 深度集成，支持 `[locale]` 动态路由。
+- 中间件自动检测语言偏好并重定向。
+- JSON 消息文件结构清晰，便于翻译管理。
+- 支持英文（en）和中文（zh）。
+
 ## Monorepo：pnpm workspace + Turborepo
 
 Monorepo 结构便于共享：
@@ -46,7 +55,6 @@ Monorepo 结构便于共享：
 - 数据库 schema
 - UI tokens 与组件
 - CI 流水线
-
 ## 不选项
 
 | 选项 | 暂不采用原因 |
