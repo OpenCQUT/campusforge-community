@@ -969,6 +969,180 @@ img {
   justify-content: space-between;
 }
 
+/* ─── Profile ──────────────────────────────────────────────────────────────── */
+
+.profile-page {
+  max-width: 1120px;
+}
+
+.profile-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  padding-bottom: 80px;
+}
+
+.profile-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.profile-card {
+  padding: 28px;
+}
+
+.profile-card h2 {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.profile-identity-card {
+  display: grid;
+  gap: 18px;
+}
+
+.profile-identity-card p,
+.profile-section-header p,
+.profile-muted {
+  color: var(--text-500);
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.profile-avatar {
+  display: grid;
+  width: 64px;
+  height: 64px;
+  place-items: center;
+  border: 1px solid rgba(124, 77, 255, 0.45);
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(124, 77, 255, 0.22), rgba(18, 215, 232, 0.1));
+  color: var(--text-100);
+  font-size: 1.05rem;
+  font-weight: 800;
+  box-shadow: 0 0 26px rgba(124, 77, 255, 0.18);
+}
+
+.profile-detail-list,
+.profile-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.profile-row,
+.profile-list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(125, 150, 255, 0.06);
+}
+
+.profile-row:last-child,
+.profile-list-row:last-child {
+  border-bottom: 0;
+}
+
+.profile-row span,
+.profile-inline-meta,
+.profile-stat span {
+  color: var(--text-500);
+  font-size: 0.8rem;
+}
+
+.profile-row strong,
+.profile-list-row > span {
+  min-width: 0;
+  color: var(--text-300);
+  font-size: 0.88rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.profile-stat-row {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.profile-stat > div {
+  font-size: 1.8rem;
+  font-weight: 800;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--purple), var(--cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.profile-stat span {
+  display: block;
+  margin-top: 6px;
+}
+
+.profile-github-card {
+  min-width: 0;
+}
+
+.profile-section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.profile-connect-row {
+  display: flex;
+  gap: 10px;
+}
+
+.profile-connect-row input {
+  flex: 1;
+  min-width: 0;
+  padding: 11px 14px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  background: rgba(5, 12, 27, 0.9);
+  color: var(--text-100);
+  font: inherit;
+  font-size: 0.88rem;
+}
+
+.profile-github-total {
+  padding: 18px 0 20px;
+  border-top: 1px solid rgba(125, 150, 255, 0.08);
+  border-bottom: 1px solid rgba(125, 150, 255, 0.08);
+}
+
+.profile-graph-panel {
+  margin-bottom: 24px;
+  padding: 18px;
+  border: 1px solid rgba(125, 150, 255, 0.12);
+  border-radius: var(--radius-sm);
+  background: rgba(5, 12, 27, 0.42);
+}
+
+.profile-subtitle {
+  margin-bottom: 12px;
+  color: var(--text-500);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.profile-inline-meta {
+  display: flex;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
 /* ─── Responsive ─────────────────────────────────────────────────────────────── */
 
 @media (max-width: 900px) {
@@ -1029,6 +1203,10 @@ img {
     flex-direction: column;
   }
 
+  .profile-layout {
+    grid-template-columns: 1fr;
+  }
+
   .admin-sidebar {
     flex: none;
     flex-direction: row;
@@ -1042,6 +1220,10 @@ img {
 
 @media (max-width: 600px) {
   .site-header {
+    height: auto;
+    min-height: var(--header-h);
+    flex-wrap: wrap;
+    gap: 8px 12px;
     padding: 0 16px;
   }
 
@@ -1065,7 +1247,15 @@ img {
   }
 
   .site-nav {
+    order: 3;
+    width: 100%;
     gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .site-nav::-webkit-scrollbar {
+    display: none;
   }
 
   .site-nav a {
@@ -1101,6 +1291,17 @@ img {
 
   .auth-hero {
     padding-top: 32px;
+  }
+
+  .profile-section-header,
+  .profile-connect-row,
+  .profile-list-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .profile-inline-meta {
+    justify-content: space-between;
   }
 }
 

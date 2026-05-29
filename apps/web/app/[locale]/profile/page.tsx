@@ -5,14 +5,10 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { getCourseProgress, type CourseProgress } from "@/lib/learning-store";
 
-import { config } from "@/lib/config";
-
-
-
 // ─── Session helpers ────────────────────────────────────────────────────────
 
-function getAccountName(email: string): string {
-  if (email.toLowerCase() === config.admin.email.toLowerCase()) return "Admin";
+function getAccountName(email: string, role: string): string {
+  if (role === "admin") return "Admin";
   return email.split("@")[0] ?? email;
 }
 
@@ -124,7 +120,7 @@ export default function ProfilePage() {
 
   const email = getSessionEmail() ?? "unknown";
   const role = getSessionRole() ?? "member";
-  const displayName = getAccountName(email);
+  const displayName = getAccountName(email, role);
 
 
 
@@ -239,63 +235,76 @@ export default function ProfilePage() {
   const completedCount = courses.filter((c) => c.completedAt).length;
 
   return (
-    <main className="page" style={{ maxWidth: 720, margin: "0 auto" }}>
+    <main className="page profile-page">
       <div className="page-header">
         <h1 className="page-title">{displayName}</h1>
         <p className="page-subtitle">{t("title")}</p>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      <div className="profile-layout">
         {/* ── Account Info ────────────────────────────────────── */}
-        <div className="glass-card" style={{ padding: 28 }}>
-          <h2 style={{ fontSize: "1rem", fontWeight: 700, marginBottom: 16 }}>{t("accountInfo")}</h2>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <Row label={t("email")} value={email} />
-            <Row label={t("role")} value={<span className={`tag ${role === "admin" ? "tag-cyan" : "tag-blue"}`}>{role.toUpperCase()}</span>} />
+        <aside className="profile-sidebar">
+          <div className="glass-card profile-card profile-identity-card">
+            <div className="profile-avatar" aria-hidden="true">
+              {displayName.slice(0, 2).toUpperCase()}
+            </div>
+            <div>
+              <h2>{t("accountInfo")}</h2>
+              <p>{email}</p>
+            </div>
+            <div className="profile-detail-list">
+              <Row label={t("email")} value={email} />
+              <Row label={t("role")} value={<span className={`tag ${role === "admin" ? "tag-cyan" : "tag-blue"}`}>{role.toUpperCase()}</span>} />
+            </div>
           </div>
 
-
-        </div>
-
-        <div className="glass-card" style={{ padding: 28 }}>
-          <h2 style={{ fontSize: "1rem", fontWeight: 700, marginBottom: 16 }}>{t("learning")}</h2>
-          {startedCount > 0 ? (
-            <>
-              <div style={{ display: "flex", gap: 24, marginBottom: 16 }}>
-                <StatBlock label={t("coursesStarted")} value={startedCount} />
-                <StatBlock label={t("coursesCompleted")} value={completedCount} />
+          <div className="glass-card profile-card">
+            <h2>{t("learning")}</h2>
+            {startedCount > 0 ? (
+              <>
+                <div className="profile-stat-row">
+                  <StatBlock label={t("coursesStarted")} value={startedCount} />
+                  <StatBlock label={t("coursesCompleted")} value={completedCount} />
+                </div>
+                <div className="profile-list">
+                  {courses.map((c) => (
+                    <div key={c.id} className="profile-list-row">
+                      <span>{c.title}</span>
+                      {c.completedAt
+                        ? <span className="tag tag-success">Done</span>
+                        : <span className="tag tag-blue">In Progress</span>}
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div>
+                <p className="profile-muted">{t("noCourses")}</p>
+                <Link href="/courses" className="btn btn-ghost btn-sm">{t("viewAllCourses")}</Link>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {courses.map((c) => (
-                  <div key={c.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: "1px solid rgba(125,150,255,0.06)" }}>
-                    <span style={{ fontSize: "0.88rem" }}>{c.title}</span>
-                    {c.completedAt
-                      ? <span className="tag tag-success" style={{ fontSize: "0.7rem" }}>Done</span>
-                      : <span className="tag tag-blue" style={{ fontSize: "0.7rem" }}>In Progress</span>}
-                  </div>
-                ))}
-              </div>
-            </>
-          ) : (
-            <div>
-              <p style={{ color: "var(--text-500)", fontSize: "0.9rem", marginBottom: 16 }}>{t("noCourses")}</p>
-              <Link href="/courses" className="btn btn-ghost btn-sm">{t("viewAllCourses")}</Link>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        </aside>
 
         {/* ── GitHub ──────────────────────────────────────────── */}
-        <div className="glass-card" style={{ padding: 28 }}>
-          <h2 style={{ fontSize: "1rem", fontWeight: 700, marginBottom: 16 }}>{t("github")}</h2>
+        <section className="glass-card profile-card profile-github-card">
+          <div className="profile-section-header">
+            <div>
+              <h2>{t("github")}</h2>
+              <p>{t("contributionGraph")}</p>
+            </div>
+            {ghUsername && (
+              <button className="btn btn-ghost btn-sm" onClick={handleDisconnect}>{t("disconnect")}</button>
+            )}
+          </div>
           {!ghUsername ? (
-            <div style={{ display: "flex", gap: 8 }}>
+            <div className="profile-connect-row">
               <input
                 type="text"
                 placeholder={t("githubPlaceholder")}
                 value={ghInput}
                 onChange={(e) => setGhInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleConnect()}
-                style={{ flex: 1, padding: "10px 14px", border: "1px solid var(--glass-border)", borderRadius: "var(--radius-sm)", background: "var(--bg-900)", color: "var(--text-100)", fontSize: "0.88rem" }}
               />
               <button className="btn btn-primary btn-sm" onClick={handleConnect}>{t("connect")}</button>
             </div>
@@ -309,59 +318,43 @@ export default function ProfilePage() {
           ) : ghStats ? (
             <>
               {/* Total contributions */}
-              <div style={{ marginBottom: 20 }}>
+              <div className="profile-stat-row profile-github-total">
                 <StatBlock label={t("totalContributions")} value={ghStats.totalContributions} />
+                {ghStats.orgStats
+                  .filter((org) => org.prs > 0 || org.issues > 0)
+                  .map((org) => (
+                    <React.Fragment key={org.name}>
+                        <StatBlock label={t("pullRequests")} value={org.prs} />
+                        <StatBlock label={t("issues")} value={org.issues} />
+                    </React.Fragment>
+                  ))}
               </div>
 
               {/* Contribution graph */}
-              <div style={{ marginBottom: 24 }}>
-                <h3 style={{ fontSize: "0.82rem", fontWeight: 600, color: "var(--text-500)", marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                  {t("contributionGraph")}
-                </h3>
+              <div className="profile-graph-panel">
                 <ContributionGraph weeks={ghStats.contributionWeeks} />
               </div>
 
-              {/* OpenCQUT contributions */}
-              {ghStats.orgStats.length > 0 && ghStats.orgStats.some(o => o.prs > 0 || o.issues > 0) && (
-                <div style={{ marginBottom: 20 }}>
-                  <h3 style={{ fontSize: "0.82rem", fontWeight: 600, color: "var(--text-500)", marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                    {t("openCqutContributions")}
-                  </h3>
-                  <div style={{ display: "flex", gap: 24 }}>
-                    {ghStats.orgStats.map((org) => (
-                      <div key={org.name} style={{ display: "flex", gap: 24 }}>
-                        <StatBlock label={t("pullRequests")} value={org.prs} />
-                        <StatBlock label={t("issues")} value={org.issues} />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               {/* Major open source contributions */}
               {ghStats.ossContributions.length > 0 && (
-                <div style={{ marginBottom: 16 }}>
-                  <h3 style={{ fontSize: "0.82rem", fontWeight: 600, color: "var(--text-500)", marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                    {t("ossContributions")}
-                  </h3>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <div>
+                  <h3 className="profile-subtitle">{t("ossContributions")}</h3>
+                  <div className="profile-list">
                     {ghStats.ossContributions.map((org) => (
-                      <div key={org.org} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", borderRadius: "var(--radius-sm)", border: "1px solid var(--glass-border)" }}>
-                        <span style={{ fontWeight: 600, fontSize: "0.88rem" }}>{org.org}</span>
-                        <div style={{ display: "flex", gap: 16 }}>
-                          <span style={{ fontSize: "0.82rem", color: "var(--text-500)" }}>{org.prs} PRs</span>
-                          <span style={{ fontSize: "0.82rem", color: "var(--text-500)" }}>{org.issues} Issues</span>
+                      <div key={org.org} className="profile-list-row">
+                        <span>{org.org}</span>
+                        <div className="profile-inline-meta">
+                          <span>{org.prs} PRs</span>
+                          <span>{org.issues} Issues</span>
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
-
-              <button className="btn btn-ghost btn-sm" onClick={handleDisconnect}>{t("disconnect")}</button>
             </>
           ) : null}
-        </div>
+        </section>
       </div>
     </main>
   );
@@ -371,20 +364,20 @@ export default function ProfilePage() {
 
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-      <span style={{ color: "var(--text-500)", fontSize: "0.85rem" }}>{label}</span>
-      <span style={{ fontSize: "0.88rem", fontWeight: 500 }}>{value}</span>
+    <div className="profile-row">
+      <span>{label}</span>
+      <strong>{value}</strong>
     </div>
   );
 }
 
 function StatBlock({ label, value }: { label: string; value: number }) {
   return (
-    <div>
-      <div style={{ fontSize: "1.6rem", fontWeight: 800, lineHeight: 1, background: "linear-gradient(135deg, var(--purple), var(--cyan))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+    <div className="profile-stat">
+      <div>
         {value}
       </div>
-      <div style={{ fontSize: "0.78rem", color: "var(--text-500)", marginTop: 4 }}>{label}</div>
+      <span>{label}</span>
     </div>
   );
 }
