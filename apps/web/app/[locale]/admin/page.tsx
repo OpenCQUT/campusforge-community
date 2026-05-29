@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { getAllApplications, updateApplication, type StoredApplication } from "@/lib/application-store";
+import { config } from "@/lib/config";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -36,99 +37,31 @@ interface AuditEntry {
 
 // ─── Mock Data Factories ────────────────────────────────────────────────────
 
-function applicationsData(l: string): Application[] {
-  const zh = [
-    { id: "a1", name: "张伟", email: "zhangwei@school.edu", studentId: "2024001", department: "计算机科学", reason: "对开源项目非常感兴趣，希望学习和贡献。有 TypeScript 和 Python 基础。", status: "SUBMITTED" as AppStatus, date: "2025-05-25", reviewNote: "" },
-    { id: "a2", name: "李明", email: "liming@school.edu", studentId: "2024002", department: "电气工程", reason: "想学习嵌入式系统开发，听说社区有相关工作坊和课程。", status: "UNDER_REVIEW" as AppStatus, date: "2025-05-24", reviewNote: "" },
-    { id: "a3", name: "王芳", email: "wangfang@school.edu", studentId: "2024003", department: "设计", reason: "擅长 UI/UX 设计，想为社区项目贡献设计能力。", status: "APPROVED" as AppStatus, date: "2025-05-20", reviewNote: "设计能力突出。" },
-    { id: "a4", name: "陈杰", email: "chenjie@school.edu", studentId: "2024004", department: "数学", reason: "想加入。", status: "REJECTED" as AppStatus, date: "2025-05-18", reviewNote: "理由过于简短。" },
-    { id: "a5", name: "刘洋", email: "liuyang@school.edu", studentId: "2024005", department: "物理", reason: "对数据分析和科学计算有兴趣，希望找到志同道合的伙伴。", status: "NEEDS_INFO" as AppStatus, date: "2025-05-22", reviewNote: "请补充编程经验。" },
-    { id: "a6", name: "赵敏", email: "zhaomin@school.edu", studentId: "2024006", department: "计算机科学", reason: "大二学生，正在学习全栈开发，想通过社区项目积累实战经验。", status: "SUBMITTED" as AppStatus, date: "2025-05-26", reviewNote: "" },
-  ];
-  const en = [
-    { id: "a1", name: "Zhang Wei", email: "zhangwei@school.edu", studentId: "2024001", department: "Computer Science", reason: "Very interested in open-source projects. Experienced with TypeScript and Python.", status: "SUBMITTED" as AppStatus, date: "2025-05-25", reviewNote: "" },
-    { id: "a2", name: "Li Ming", email: "liming@school.edu", studentId: "2024002", department: "Electrical Engineering", reason: "Want to learn embedded systems development. Heard the community has workshops.", status: "UNDER_REVIEW" as AppStatus, date: "2025-05-24", reviewNote: "" },
-    { id: "a3", name: "Wang Fang", email: "wangfang@school.edu", studentId: "2024003", department: "Design", reason: "Specialize in UI/UX design. Want to contribute design skills to projects.", status: "APPROVED" as AppStatus, date: "2025-05-20", reviewNote: "Strong design skills." },
-    { id: "a4", name: "Chen Jie", email: "chenjie@school.edu", studentId: "2024004", department: "Mathematics", reason: "Want to join.", status: "REJECTED" as AppStatus, date: "2025-05-18", reviewNote: "Reason too brief." },
-    { id: "a5", name: "Liu Yang", email: "liuyang@school.edu", studentId: "2024005", department: "Physics", reason: "Interested in data analysis and scientific computing.", status: "NEEDS_INFO" as AppStatus, date: "2025-05-22", reviewNote: "Add programming experience." },
-    { id: "a6", name: "Zhao Min", email: "zhaomin@school.edu", studentId: "2024006", department: "Computer Science", reason: "Second-year student learning full-stack development.", status: "SUBMITTED" as AppStatus, date: "2025-05-26", reviewNote: "" },
-  ];
-  return l === "zh" ? zh : en;
+function applicationsData(): Application[] {
+  return [];
 }
 
-function membersData(l: string): Member[] {
-  if (l === "zh") return [
-    { id: "m1", name: "王芳", email: "wangfang@school.edu", studentId: "2024003", department: "设计", role: "MEMBER", joinedAt: "2025-05-21" },
-    { id: "m2", name: "孙鹏", email: "sunpeng@school.edu", studentId: "2023010", department: "计算机科学", role: "MAINTAINER", joinedAt: "2025-03-10" },
-    { id: "m3", name: "周琳", email: "zhoulin@school.edu", studentId: "2023022", department: "软件工程", role: "MEMBER", joinedAt: "2025-04-05" },
-    { id: "m4", name: "管理员", email: "test@admin.edu", studentId: "-", department: "-", role: "ADMIN", joinedAt: "2025-01-01" },
-  ];
+function membersData(locale: string): Member[] {
+  const isAdmin = locale === "zh";
+  const email = config.admin.email || "admin@example.com";
   return [
-    { id: "m1", name: "Wang Fang", email: "wangfang@school.edu", studentId: "2024003", department: "Design", role: "MEMBER", joinedAt: "2025-05-21" },
-    { id: "m2", name: "Sun Peng", email: "sunpeng@school.edu", studentId: "2023010", department: "Computer Science", role: "MAINTAINER", joinedAt: "2025-03-10" },
-    { id: "m3", name: "Zhou Lin", email: "zhoulin@school.edu", studentId: "2023022", department: "Software Engineering", role: "MEMBER", joinedAt: "2025-04-05" },
-    { id: "m4", name: "Admin", email: "test@admin.edu", studentId: "-", department: "-", role: "ADMIN", joinedAt: "2025-01-01" },
+    { id: "m1", name: isAdmin ? "管理员" : "Admin", email, studentId: "-", department: "-", role: "ADMIN", joinedAt: "2025-01-01" },
   ];
 }
-
-function invitationsData(l: string): Invitation[] {
-  if (l === "zh") return [
-    { id: "i1", code: "CFG-A3-WF-2025", applicantName: "王芳", email: "wangfang@school.edu", expiresAt: "2025-06-20", usedAt: "2025-05-21", revoked: false },
-    { id: "i2", code: "CFG-A2-LM-2025", applicantName: "李明", email: "liming@school.edu", expiresAt: "2025-06-24", usedAt: null, revoked: false },
-    { id: "i3", code: "CFG-A4-CJ-2025", applicantName: "陈杰", email: "chenjie@school.edu", expiresAt: "2025-06-18", usedAt: null, revoked: true },
-  ];
-  return [
-    { id: "i1", code: "CFG-A3-WF-2025", applicantName: "Wang Fang", email: "wangfang@school.edu", expiresAt: "2025-06-20", usedAt: "2025-05-21", revoked: false },
-    { id: "i2", code: "CFG-A2-LM-2025", applicantName: "Li Ming", email: "liming@school.edu", expiresAt: "2025-06-24", usedAt: null, revoked: false },
-    { id: "i3", code: "CFG-A4-CJ-2025", applicantName: "Chen Jie", email: "chenjie@school.edu", expiresAt: "2025-06-18", usedAt: null, revoked: true },
-  ];
+function invitationsData(): Invitation[] {
+  return [];
 }
 
-function coursesData(l: string): CourseItem[] {
-  if (l === "zh") return [
-    { id: "c1", title: "开源入门", type: "自学课程", status: "ACTIVE", difficulty: "初级", students: 28 },
-    { id: "c2", title: "React 与 Next.js 工作坊", type: "工作坊", status: "ACTIVE", difficulty: "中级", students: 15 },
-    { id: "c3", title: "新成员入职培训", type: "入职培训", status: "ACTIVE", difficulty: "初级", students: 42 },
-    { id: "c4", title: "TypeScript 深入学习", type: "课程组", status: "DRAFT", difficulty: "高级", students: 0 },
-  ];
-  return [
-    { id: "c1", title: "Introduction to Open Source", type: "Self Study", status: "ACTIVE", difficulty: "Beginner", students: 28 },
-    { id: "c2", title: "React & Next.js Workshop", type: "Workshop", status: "ACTIVE", difficulty: "Intermediate", students: 15 },
-    { id: "c3", title: "New Member Onboarding", type: "Onboarding", status: "ACTIVE", difficulty: "Beginner", students: 42 },
-    { id: "c4", title: "TypeScript Deep Dive", type: "Cohort", status: "DRAFT", difficulty: "Advanced", students: 0 },
-  ];
+function coursesData(): CourseItem[] {
+  return [];
 }
 
-function resourcesData(l: string): ResourceItem[] {
-  if (l === "zh") return [
-    { id: "r1", title: "Git 与 GitHub 入门指南", type: "Guide", status: "ACTIVE", updatedAt: "2025-05-15" },
-    { id: "r2", title: "项目提案模板", type: "Template", status: "ACTIVE", updatedAt: "2025-05-10" },
-    { id: "r3", title: "VS Code 扩展包", type: "Tool", status: "ACTIVE", updatedAt: "2025-05-08" },
-    { id: "r4", title: "代码审查指南", type: "Internal Doc", status: "ARCHIVED", updatedAt: "2025-03-01" },
-  ];
-  return [
-    { id: "r1", title: "Git & GitHub Starter Guide", type: "Guide", status: "ACTIVE", updatedAt: "2025-05-15" },
-    { id: "r2", title: "Project Proposal Template", type: "Template", status: "ACTIVE", updatedAt: "2025-05-10" },
-    { id: "r3", title: "VS Code Extension Pack", type: "Tool", status: "ACTIVE", updatedAt: "2025-05-08" },
-    { id: "r4", title: "Code Review Guidelines", type: "Internal Doc", status: "ARCHIVED", updatedAt: "2025-03-01" },
-  ];
+function resourcesData(): ResourceItem[] {
+  return [];
 }
 
-function auditData(l: string): AuditEntry[] {
-  if (l === "zh") return [
-    { id: "log1", actor: "管理员", action: "批准申请", target: "王芳 (app-003)", time: "2025-05-20 14:30" },
-    { id: "log2", actor: "管理员", action: "拒绝申请", target: "陈杰 (app-004)", time: "2025-05-18 09:15" },
-    { id: "log3", actor: "管理员", action: "要求补充信息", target: "刘洋 (app-005)", time: "2025-05-22 16:45" },
-    { id: "log4", actor: "管理员", action: "撤销邀请", target: "CFG-A4-CJ-2025", time: "2025-05-18 09:20" },
-    { id: "log5", actor: "管理员", action: "归档资源", target: "代码审查指南", time: "2025-05-17 11:00" },
-  ];
-  return [
-    { id: "log1", actor: "Admin", action: "Approved application", target: "Wang Fang (app-003)", time: "2025-05-20 14:30" },
-    { id: "log2", actor: "Admin", action: "Rejected application", target: "Chen Jie (app-004)", time: "2025-05-18 09:15" },
-    { id: "log3", actor: "Admin", action: "Requested info", target: "Liu Yang (app-005)", time: "2025-05-22 16:45" },
-    { id: "log4", actor: "Admin", action: "Revoked invitation", target: "CFG-A4-CJ-2025", time: "2025-05-18 09:20" },
-    { id: "log5", actor: "Admin", action: "Archived resource", target: "Code Review Guidelines", time: "2025-05-17 11:00" },
-  ];
+function auditData(): AuditEntry[] {
+  return [];
 }
 
 // ─── Role colors ────────────────────────────────────────────────────────────
@@ -159,16 +92,16 @@ export default function AdminPage() {
       id: a.id, name: a.name, email: a.email, studentId: a.studentId,
       department: a.department, reason: a.reason, status: a.status, date: a.submittedAt, reviewNote: a.reviewNote,
     }));
-    const mock = applicationsData(locale);
+    const mock = applicationsData();
     // Deduplicate by email
     const mockFiltered = mock.filter((m) => !stored.some((s) => s.email.toLowerCase() === m.email.toLowerCase()));
     return [...stored, ...mockFiltered];
   });
   const [members, setMembers] = useState(() => membersData(locale));
-  const [invitations, setInvitations] = useState(() => invitationsData(locale));
-  const [courses, setCourses] = useState(() => coursesData(locale));
-  const [resources, setResources] = useState(() => resourcesData(locale));
-  const [auditLog, setAuditLog] = useState(() => auditData(locale));
+  const [invitations, setInvitations] = useState(() => invitationsData());
+  const [courses, setCourses] = useState(() => coursesData());
+  const [resources, setResources] = useState(() => resourcesData());
+  const [auditLog, setAuditLog] = useState(() => auditData());
 
   // Applications state
   const [appFilter, setAppFilter] = useState<string>("ALL");

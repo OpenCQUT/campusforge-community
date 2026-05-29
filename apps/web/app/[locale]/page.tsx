@@ -3,10 +3,15 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
+import { config } from "@/lib/config";
 
-const ACCOUNTS: Record<string, { password: string; role: string }> = {
-  "test@admin.edu": { password: "123456", role: "admin" },
-};
+function getAccounts(): Record<string, { password: string; role: string }> {
+  const accounts: Record<string, { password: string; role: string }> = {};
+  if (config.admin.email && config.admin.password) {
+    accounts[config.admin.email.toLowerCase()] = { password: config.admin.password, role: "admin" };
+  }
+  return accounts;
+}
 
 export default function LoginPage() {
   const t = useTranslations("login");
@@ -21,7 +26,7 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
 
-    const account = ACCOUNTS[email.trim().toLowerCase()];
+    const account = getAccounts()[email.trim().toLowerCase()];
     if (!account || account.password !== password) {
       setError(t("invalidCredentials"));
       return;

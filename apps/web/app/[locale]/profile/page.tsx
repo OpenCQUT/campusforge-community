@@ -5,25 +5,16 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { getApplicationByEmail, type StoredApplication } from "@/lib/application-store";
 import { getCourseProgress, type CourseProgress } from "@/lib/learning-store";
+import { config } from "@/lib/config";
 
 // ─── Session helpers ────────────────────────────────────────────────────────
 
-const ACCOUNTS: Record<string, { name: string; role: string }> = {
-  "test@admin.edu": { name: "Admin", role: "admin" },
-};
+function getAccountName(email: string): string {
+  if (email.toLowerCase() === config.admin.email.toLowerCase()) return "Admin";
+  return email.split("@")[0] ?? email;
+}
 
-const MOCK_DB: Record<string, StoredApplication> = {
-  "student@school.edu": {
-    id: "demo-001", name: "student", email: "student@school.edu",
-    studentId: "2024001", department: "Computer Science", reason: "",
-    status: "UNDER_REVIEW", submittedAt: "2025-05-20", reviewNote: "",
-  },
-  "liming@school.edu": {
-    id: "demo-002", name: "Li Ming", email: "liming@school.edu",
-    studentId: "2024002", department: "Electrical Engineering", reason: "",
-    status: "APPROVED", submittedAt: "2025-05-18", reviewNote: "Welcome!",
-  },
-};
+const MOCK_DB: Record<string, StoredApplication> = {};
 
 function getSessionEmail(): string | null {
   if (typeof document === "undefined") return null;
@@ -55,8 +46,7 @@ export default function ProfilePage() {
 
   const email = getSessionEmail() ?? "unknown";
   const role = getSessionRole() ?? "member";
-  const account = ACCOUNTS[email];
-  const displayName = account?.name ?? email.split("@")[0];
+  const displayName = getAccountName(email);
 
   const application = getApplicationByEmail(email) ?? MOCK_DB[email] ?? null;
 

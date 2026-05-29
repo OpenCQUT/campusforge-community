@@ -13,25 +13,8 @@ interface Application {
   submittedAt: string;
 }
 
-// Demo data — will be replaced with API call
-const MOCK_DB: Record<string, Application> = {
-  "student@school.edu": {
-    id: "demo-001",
-    schoolEmail: "student@school.edu",
-    studentId: "2024001",
-    department: "Computer Science",
-    status: "UNDER_REVIEW",
-    submittedAt: "2025-05-20",
-  },
-  "liming@school.edu": {
-    id: "demo-002",
-    schoolEmail: "liming@school.edu",
-    studentId: "2024002",
-    department: "Electrical Engineering",
-    status: "APPROVED",
-    submittedAt: "2025-05-18",
-  },
-};
+// No demo data — all applications come from the shared store
+const MOCK_DB: Record<string, Application> = {};
 
 export default function StatusPage() {
   const t = useTranslations("status");
