@@ -7,4 +7,197 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Add application models here when the product data model is finalized.
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum Role {
+  STUDENT
+  MEMBER
+  MAINTAINER
+  ADMIN
+}
+
+enum ApplicationStatus {
+  DRAFT
+  SUBMITTED
+  VERIFYING
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  NEEDS_INFO
+}
+
+enum ResourceType {
+  GUIDE
+  TEMPLATE
+  TOOL
+  POLICY
+  INTERNAL_DOC
+}
+
+enum CourseType {
+  SELF_STUDY
+  WORKSHOP
+  ONBOARDING
+  COHORT
+}
+
+enum CourseStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum DocumentStatus {
+  DRAFT
+  REVIEWED
+  ACTIVE
+  ARCHIVED
+}
+
+// ─── User & Membership ──────────────────────────────────────────────────────
+
+model User {
+  id         String   @id @default(cuid())
+  email      String   @unique
+  studentId  String?  @unique
+  name       String
+  department String?
+  role       Role     @default(STUDENT)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  membership  Membership?
+  application InvitationApplication?
+  reviews     InvitationApplication[] @relation("Reviewer")
+  enrollments CourseEnrollment[]
+  auditLogs   AuditLog[]
+}
+
+model Membership {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  joinedAt  DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ─── Invitation ─────────────────────────────────────────────────────────────
+
+model InvitationApplication {
+  id           String            @id @default(cuid())
+  userId       String           @unique
+  schoolEmail  String
+  studentId    String
+  department   String
+  reason       String
+  status       ApplicationStatus @default(DRAFT)
+  reviewerId   String?
+  reviewReason String?
+  reviewedAt   DateTime?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  user     User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reviewer User? @relation("Reviewer", fields: [reviewerId], references: [id])
+  interests Interest[]
+  invitation Invitation?
+
+  @@index([status])
+  @@index([schoolEmail])
+}
+
+model Invitation {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  applicationId String @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  application InvitationApplication @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+}
+
+model Interest {
+  id   String @id @default(cuid())
+  name String @unique
+
+  applications InvitationApplication[]
+}
+
+// ─── Resources ──────────────────────────────────────────────────────────────
+
+model Resource {
+  id          String       @id @default(cuid())
+  title       String
+  description String
+  url         String?
+  type        ResourceType
+  createdById String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([type])
+  @@index([updatedAt])
+}
+
+// ─── Courses ────────────────────────────────────────────────────────────────
+
+model Course {
+  id          String      @id @default(cuid())
+  title       String
+  description String
+  type        CourseType
+  status      CourseStatus @default(DRAFT)
+  difficulty  String?
+  duration    String?
+  maxStudents Int?
+  createdById String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  enrollments CourseEnrollment[]
+
+  @@index([status])
+}
+
+model CourseEnrollment {
+  id         String   @id @default(cuid())
+  userId     String
+  courseId    String
+  enrolledAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+}
+
+// ─── Policy Documents ───────────────────────────────────────────────────────
+
+model PolicyDocument {
+  id          String         @id @default(cuid())
+  title       String
+  content     String
+  status      DocumentStatus @default(DRAFT)
+  version     Int            @default(1)
+  createdById String
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([status])
+}
+
+// ─── Audit Log ──────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String
+  action     String
+  targetType String
+  targetId   String
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  actor User @relation(fields: [actorId], references: [id])
+
+  @@index([createdAt])
+}
