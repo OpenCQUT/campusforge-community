@@ -5,6 +5,8 @@ import {
   saveGitHubProfileCache,
   type GitHubStats,
 } from "@/lib/github-profile-cache-store";
+import { loadServerConfig } from "@/lib/server-config";
+import { getSessionFromRequest, getSessionSecret } from "@/lib/session";
 
 interface GitHubSearchItem {
   repository_url?: string;
@@ -39,10 +41,6 @@ interface RepoContribution {
   issues: number;
   commits: number;
   isOpenCqut: boolean;
-}
-
-function hasSession(request: Request): boolean {
-  return /(?:^|;\s*)cf_session=/.test(request.headers.get("cookie") ?? "");
 }
 
 function getRepoFullName(repositoryUrl?: string): string | null {
@@ -173,7 +171,12 @@ async function fetchGitHubStats(username: string): Promise<GitHubStats> {
 }
 
 export async function GET(request: Request) {
-  if (!hasSession(request)) {
+  const config = loadServerConfig();
+  const session = await getSessionFromRequest(
+    request,
+    getSessionSecret(config.app.sessionSecret, config.admin.password),
+  );
+  if (!session) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 

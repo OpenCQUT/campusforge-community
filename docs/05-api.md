@@ -64,6 +64,14 @@ Request body:
 
 ## Web 应用接口
 
+### `POST /api/session`
+
+管理员登录。认证成功后写入服务端签名的 `HttpOnly` 会话 Cookie。
+
+### `DELETE /api/session`
+
+退出登录并清除会话 Cookie。
+
 ### `GET /api/github/issues`
 
 列出 `config.toml` 中 `[github].org` 组织下的开放 Issue。默认组织为 `OpenCQUT`。

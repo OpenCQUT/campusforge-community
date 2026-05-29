@@ -23,6 +23,7 @@ pnpm db:seed
 
 - Node server 或 Vercel-like 平台。
 - 设置 `NEXT_PUBLIC_API_BASE_URL`。
+- 设置 `CAMPUSFORGE_SESSION_SECRET`，或在 `config.toml` 中设置 `[app].session_secret`。
 - 配置 CSP、HTTPS、错误监控。
 
 ### API

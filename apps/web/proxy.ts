@@ -15,7 +15,7 @@ function matchesAny(pathname: string, paths: string[]): boolean {
   return paths.some((p) => pathname === p || pathname.startsWith(p + "/"));
 }
 
-export default function middleware(request: NextRequest) {
+export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const bare = stripLocale(pathname);
   const locale = pathname.match(/^\/(en|zh)/)?.[1] ?? routing.defaultLocale;
@@ -32,7 +32,8 @@ export default function middleware(request: NextRequest) {
   }
 
   // Admin-only paths — require admin role
-  if (matchesAny(bare, ADMIN_PATHS) && session.value !== "admin") {
+  const role = request.cookies.get("cf_role");
+  if (matchesAny(bare, ADMIN_PATHS) && role?.value !== "admin") {
     return NextResponse.redirect(new URL(`/${locale}/resources`, request.url));
   }
 

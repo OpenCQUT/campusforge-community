@@ -10,3 +10,4 @@ client_secret = ""
 
 [app]
 debug = true
+session_secret = "replace-with-a-long-random-secret"

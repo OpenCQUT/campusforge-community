@@ -24,7 +24,7 @@ interface IssueItem {
 
 function getSessionRole(): string {
   if (typeof document === "undefined") return "";
-  const match = document.cookie.match(/cf_session=(\w+)/);
+  const match = document.cookie.match(/cf_role=(\w+)/);
   return match?.[1] ?? "";
 }
 

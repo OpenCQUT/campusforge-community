@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { loadServerConfig } from "@/lib/server-config";
 import { deleteIssueClaim, findIssueClaim, saveIssueClaim } from "@/lib/issue-claim-store";
+import { getSessionFromRequest, getSessionSecret, type SignedSession } from "@/lib/session";
 
 interface ClaimBody {
   owner?: string;
@@ -20,22 +21,21 @@ function githubHeaders(token: string): HeadersInit {
   };
 }
 
-function hasSession(request: Request): boolean {
-  return /(?:^|;\s*)cf_session=/.test(request.headers.get("cookie") ?? "");
-}
-
-function getCookie(request: Request, name: string): string {
-  const cookie = request.headers.get("cookie") ?? "";
-  const match = cookie.match(new RegExp(`(?:^|;\\s*)${name}=([^;]+)`));
-  return match?.[1] ? decodeURIComponent(match[1]) : "";
-}
-
-function isAdmin(request: Request): boolean {
-  return getCookie(request, "cf_session") === "admin";
+async function requireSession(request: Request): Promise<{
+  config: ReturnType<typeof loadServerConfig>;
+  session: SignedSession | null;
+}> {
+  const config = loadServerConfig();
+  const session = await getSessionFromRequest(
+    request,
+    getSessionSecret(config.app.sessionSecret, config.admin.password),
+  );
+  return { config, session };
 }
 
 export async function POST(request: Request) {
-  if (!hasSession(request)) {
+  const { config, session } = await requireSession(request);
+  if (!session) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
@@ -67,8 +67,7 @@ export async function POST(request: Request) {
     }, { status: 409 });
   }
 
-  const config = loadServerConfig();
-  const claimedByEmail = getCookie(request, "cf_email");
+  const claimedByEmail = session.email;
   if (!config.github.token) {
     const claim = saveIssueClaim({
       id: `${owner}/${repo}#${issueNumber}`,
@@ -144,7 +143,8 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  if (!hasSession(request)) {
+  const { session } = await requireSession(request);
+  if (!session) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
@@ -169,9 +169,9 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ cancelled: true, alreadyCancelled: true });
   }
 
-  const actorEmail = getCookie(request, "cf_email");
+  const actorEmail = session.email;
   const canCancel =
-    isAdmin(request) ||
+    session.role === "admin" ||
     (!!actorEmail && existingClaim.claimedByEmail === actorEmail) ||
     (!!assignee && existingClaim.claimedBy === assignee);
 

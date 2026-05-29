@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { loadServerConfig } from "@/lib/server-config";
 import { getIssueClaims } from "@/lib/issue-claim-store";
+import { getSessionFromRequest, getSessionSecret } from "@/lib/session";
 
 interface GitHubSearchIssue {
   id: number;
@@ -29,16 +30,16 @@ function githubHeaders(token?: string): HeadersInit {
   };
 }
 
-function hasSession(request: Request): boolean {
-  return /(?:^|;\s*)cf_session=/.test(request.headers.get("cookie") ?? "");
-}
-
 export async function GET(request: Request) {
-  if (!hasSession(request)) {
+  const config = loadServerConfig();
+  const session = await getSessionFromRequest(
+    request,
+    getSessionSecret(config.app.sessionSecret, config.admin.password),
+  );
+  if (!session) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  const config = loadServerConfig();
   const org = config.github.org || "OpenCQUT";
   const query = encodeURIComponent(`org:${org} type:issue state:open`);
   const response = await fetch(

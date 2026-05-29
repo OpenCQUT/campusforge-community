@@ -14,6 +14,7 @@ interface ServerConfig {
   };
   app: {
     debug: boolean;
+    sessionSecret: string;
   };
 }
 
@@ -33,6 +34,7 @@ const DEFAULT_CONFIG: ServerConfig = {
   },
   app: {
     debug: false,
+    sessionSecret: "",
   },
 };
 
@@ -146,6 +148,7 @@ export function loadServerConfig(): ServerConfig {
         },
         app: {
           debug: asBoolean(parsed.app?.debug),
+          sessionSecret: asString(parsed.app?.session_secret).trim(),
         },
       };
     } catch {

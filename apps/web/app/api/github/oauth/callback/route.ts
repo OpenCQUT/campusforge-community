@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { saveGitHubConnection } from "@/lib/github-connection-store";
 import { loadServerConfig } from "@/lib/server-config";
+import { getSessionFromRequest, getSessionSecret } from "@/lib/session";
 
 interface GitHubTokenResponse {
   access_token?: string;
@@ -24,9 +25,12 @@ function redirectToProfile(request: Request, status: string): NextResponse {
 }
 
 export async function GET(request: Request) {
-  const email = getCookie(request, "cf_email");
-  const session = getCookie(request, "cf_session");
-  if (!email || !session) {
+  const config = loadServerConfig();
+  const session = await getSessionFromRequest(
+    request,
+    getSessionSecret(config.app.sessionSecret, config.admin.password),
+  );
+  if (!session) {
     return redirectToProfile(request, "unauthorized");
   }
 
@@ -38,7 +42,6 @@ export async function GET(request: Request) {
     return redirectToProfile(request, "state-invalid");
   }
 
-  const config = loadServerConfig();
   if (!config.github.clientId || !config.github.clientSecret) {
     return redirectToProfile(request, "oauth-not-configured");
   }
@@ -75,7 +78,7 @@ export async function GET(request: Request) {
   }
 
   saveGitHubConnection({
-    email,
+    email: session.email,
     githubId: userData.id,
     username: userData.login,
     avatarUrl: userData.avatar_url ?? "",

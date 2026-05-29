@@ -24,7 +24,7 @@ function getSessionEmail(): string | null {
 }
 function getSessionRole(): string | null {
   if (typeof document === "undefined") return null;
-  const match = document.cookie.match(/cf_session=(\w+)/);
+  const match = document.cookie.match(/cf_role=(\w+)/);
   return match?.[1] ?? null;
 }
 

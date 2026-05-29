@@ -6,7 +6,7 @@ import { Link, usePathname, useRouter } from "@/i18n/navigation";
 
 function getSessionRole(): string | null {
   if (typeof document === "undefined") return null;
-  const match = document.cookie.match(/cf_session=(\w+)/);
+  const match = document.cookie.match(/cf_role=(\w+)/);
   return match?.[1] ?? null;
 }
 
@@ -59,8 +59,9 @@ export function SiteHeader() {
     router.replace(pathname, { locale: next });
   }
 
-  function handleLogout() {
-    document.cookie = "cf_session=; path=/; max-age=0";
+  async function handleLogout() {
+    await fetch("/api/session", { method: "DELETE" }).catch(() => undefined);
+    document.cookie = "cf_role=; path=/; max-age=0";
     document.cookie = "cf_email=; path=/; max-age=0";
     router.push("/");
   }
@@ -90,7 +91,7 @@ export function SiteHeader() {
           </Link>
         ))}
       </nav>
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <div className="site-actions">
         <button
           onClick={switchLocale}
           className="btn btn-ghost btn-sm"
