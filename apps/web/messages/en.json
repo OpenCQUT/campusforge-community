@@ -281,7 +281,21 @@
     "changePassword": "Change Password",
     "saving": "Saving...",
     "passwordChanged": "Password changed.",
-    "passwordChangeFailed": "Unable to change password. Check the current password and new password length."
+    "passwordChangeFailed": "Unable to change password. Check the current password and new password length.",
+    "serverConfig": "Server Configuration",
+    "emailMode": "Email Mode",
+    "emailFrom": "From",
+    "emailHost": "SMTP Host",
+    "emailPort": "SMTP Port",
+    "emailSecure": "Use TLS",
+    "emailUser": "SMTP User",
+    "emailPass": "SMTP Password",
+    "secretConfigured": "Configured; leave blank to keep it",
+    "codeTtl": "Code TTL (minutes)",
+    "resendCooldown": "Resend Cooldown (seconds)",
+    "saveConfig": "Save Config",
+    "configSaved": "Configuration saved.",
+    "configSaveFailed": "Unable to save configuration."
   },
 
   "statusLabel": {

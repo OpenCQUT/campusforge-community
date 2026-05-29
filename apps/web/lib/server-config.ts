@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { mergeRuntimeConfig } from "./runtime-config";
 
 export interface ServerConfig {
   admin: {
@@ -191,7 +192,7 @@ export function loadServerConfig(): ServerConfig {
   for (const candidate of configCandidates()) {
     try {
       const parsed = parseToml(readFileSync(candidate, "utf8"));
-      return {
+      return mergeRuntimeConfig({
         admin: {
           email:
             asString(parsed.admin?.email).trim() || asStringList(parsed.admin?.emails)[0] || "",
@@ -236,11 +237,11 @@ export function loadServerConfig(): ServerConfig {
             DEFAULT_CONFIG.verification.resendCooldownSeconds,
           ),
         },
-      };
+      });
     } catch {
       // Try the next config location.
     }
   }
 
-  return DEFAULT_CONFIG;
+  return mergeRuntimeConfig(DEFAULT_CONFIG);
 }

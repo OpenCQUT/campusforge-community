@@ -281,7 +281,21 @@
     "changePassword": "修改密码",
     "saving": "保存中...",
     "passwordChanged": "密码已修改。",
-    "passwordChangeFailed": "密码修改失败，请检查当前密码和新密码长度。"
+    "passwordChangeFailed": "密码修改失败，请检查当前密码和新密码长度。",
+    "serverConfig": "服务器配置",
+    "emailMode": "邮件模式",
+    "emailFrom": "发件人",
+    "emailHost": "SMTP 主机",
+    "emailPort": "SMTP 端口",
+    "emailSecure": "启用 TLS",
+    "emailUser": "SMTP 用户名",
+    "emailPass": "SMTP 密码",
+    "secretConfigured": "已配置，留空则不修改",
+    "codeTtl": "验证码有效期（分钟）",
+    "resendCooldown": "重发冷却（秒）",
+    "saveConfig": "保存配置",
+    "configSaved": "配置已保存。",
+    "configSaveFailed": "配置保存失败。"
   },
 
   "statusLabel": {
