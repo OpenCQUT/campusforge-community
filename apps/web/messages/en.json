@@ -8,7 +8,9 @@
     "getStarted": "Get Started",
     "browseResources": "Browse Resources",
     "requestInvitation": "Request Invitation",
-    "updated": "Updated {date}"
+    "updated": "Updated {date}",
+    "login": "Log In",
+    "logout": "Log Out"
   },
   "nav": {
     "home": "Home",
@@ -18,6 +20,17 @@
     "courses": "Courses",
     "policies": "Policies",
     "admin": "Admin"
+  },
+  "login": {
+    "title": "Welcome to CampusForge",
+    "subtitle": "Sign in to access resources, courses, and the community.",
+    "emailLabel": "School Email",
+    "emailPlaceholder": "you@school.edu",
+    "passwordLabel": "Password",
+    "noAccount": "Don't have an account?",
+    "applyLink": "Request an invitation",
+    "checkStatus": "Already applied?",
+    "statusLink": "Check your application status"
   },
   "home": {
     "eyebrow": "School Open-Source Community",

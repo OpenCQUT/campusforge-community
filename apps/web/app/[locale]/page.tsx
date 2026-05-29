@@ -1,75 +1,89 @@
-import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
+"use client";
 
-export default function HomePage() {
-  const t = useTranslations("home");
+import { useTranslations } from "next-intl";
+import { Link, useRouter } from "@/i18n/navigation";
+
+export default function LoginPage() {
+  const t = useTranslations("login");
   const tc = useTranslations("common");
+  const router = useRouter();
+
+  function handleLogin(e: React.FormEvent) {
+    e.preventDefault();
+    // Demo: set a session cookie and redirect to resources
+    document.cookie = "cf_session=demo; path=/; max-age=86400";
+    router.push("/resources");
+  }
 
   return (
-    <main className="page">
-      <section className="hero-section">
-        <div className="hero-text">
-          <p className="hero-eyebrow">{t("eyebrow")}</p>
-          <h1 className="hero-title">{t("title")}</h1>
-          <p className="hero-lede">{t("lede")}</p>
-          <div className="hero-actions">
-            <Link href="/apply" className="btn btn-primary">
-              {tc("requestInvitation")}
-            </Link>
-            <Link href="/resources" className="btn btn-ghost">
-              {tc("browseResources")}
-            </Link>
+    <main className="page" style={{ maxWidth: 480, margin: "0 auto" }}>
+      <div style={{ padding: "80px 0" }}>
+        <div className="glass-card" style={{ padding: 40 }}>
+          <h1
+            style={{
+              fontSize: "1.6rem",
+              fontWeight: 700,
+              marginBottom: 8,
+              textAlign: "center",
+            }}
+          >
+            {t("title")}
+          </h1>
+          <p
+            style={{
+              color: "var(--text-500)",
+              fontSize: "0.9rem",
+              textAlign: "center",
+              marginBottom: 32,
+            }}
+          >
+            {t("subtitle")}
+          </p>
+
+          <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            <div className="field">
+              <label htmlFor="email">{t("emailLabel")}</label>
+              <input
+                id="email"
+                type="email"
+                placeholder={t("emailPlaceholder")}
+              />
+            </div>
+            <div className="field">
+              <label htmlFor="password">{t("passwordLabel")}</label>
+              <input id="password" type="password" placeholder="••••••••" />
+            </div>
+            <button type="submit" className="btn btn-primary" style={{ width: "100%" }}>
+              {tc("login")}
+            </button>
+          </form>
+
+          <div
+            style={{
+              marginTop: 24,
+              textAlign: "center",
+              fontSize: "0.85rem",
+              color: "var(--text-500)",
+              display: "flex",
+              flexDirection: "column",
+              gap: 8,
+            }}
+          >
+            <span>
+              {t("noAccount")}{" "}
+              <Link href="/apply" style={{ color: "var(--cyan)" }}>
+                {t("applyLink")}
+              </Link>
+            </span>
+            <span>
+              {t("checkStatus")}{" "}
+              <Link href="/status" style={{ color: "var(--cyan)" }}>
+                {t("statusLink")}
+              </Link>
+            </span>
           </div>
         </div>
-
-        <div className="hero-card">
-          <div className="glass-card hero-card-inner">
-            <h3>{t("joinTitle")}</h3>
-            <p>{t("joinDesc")}</p>
-            <Link href="/apply" className="btn btn-primary">
-              {tc("getStarted")}
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      <section className="preview-section">
-        <h2>{t("explore")}</h2>
-        <div className="grid-3">
-          <Link href="/resources">
-            <div className="glass-card preview-card">
-              <h3>
-                <span className="tag tag-purple">Guide</span>
-                {t("resourcesTitle")}
-              </h3>
-              <p>{t("resourcesDesc")}</p>
-              <div className="card-count">{t("resourcesCount")}</div>
-            </div>
-          </Link>
-
-          <Link href="/courses">
-            <div className="glass-card preview-card">
-              <h3>
-                <span className="tag tag-blue">Learn</span>
-                {t("coursesTitle")}
-              </h3>
-              <p>{t("coursesDesc")}</p>
-              <div className="card-count">{t("coursesCount")}</div>
-            </div>
-          </Link>
-
-          <Link href="/policies">
-            <div className="glass-card preview-card">
-              <h3>
-                <span className="tag tag-cyan">Govern</span>
-                {t("policiesTitle")}
-              </h3>
-              <p>{t("policiesDesc")}</p>
-              <div className="card-count">{t("policiesCount")}</div>
-            </div>
-          </Link>
-        </div>
-      </section>
+      </div>
     </main>
   );
 }

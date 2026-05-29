@@ -1,25 +1,49 @@
 "use client";
 
-import { useTranslations } from "next-intl";
-import { Link, usePathname } from "@/i18n/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
+
+function useIsLoggedIn(): boolean {
+  if (typeof document === "undefined") return false;
+  return document.cookie.includes("cf_session=");
+}
 
 export function SiteHeader() {
   const pathname = usePathname();
-  const t = useTranslations("nav");
+  const t = useTranslations();
+  const locale = useLocale();
+  const router = useRouter();
+  const isLoggedIn = useIsLoggedIn();
 
-  const navItems = [
-    { href: "/", label: t("home") },
-    { href: "/apply", label: t("apply") },
-    { href: "/status", label: t("status") },
-    { href: "/resources", label: t("resources") },
-    { href: "/courses", label: t("courses") },
-    { href: "/policies", label: t("policies") },
-    { href: "/admin", label: t("admin") },
+  const publicNav = [
+    { href: "/apply", label: t("nav.apply") },
+    { href: "/status", label: t("nav.status") },
   ];
+
+  const protectedNav = [
+    { href: "/resources", label: t("nav.resources") },
+    { href: "/courses", label: t("nav.courses") },
+    { href: "/policies", label: t("nav.policies") },
+    { href: "/admin", label: t("nav.admin") },
+  ];
+
+  const navItems = isLoggedIn
+    ? [...protectedNav]
+    : [...publicNav];
+
+  function switchLocale() {
+    const next = locale === "en" ? "zh" : "en";
+    router.replace(pathname, { locale: next });
+  }
+
+  function handleLogout() {
+    document.cookie = "cf_session=; path=/; max-age=0";
+    router.push("/");
+  }
 
   return (
     <header className="site-header">
-      <Link href="/" className="site-logo">
+      <Link href={isLoggedIn ? "/resources" : "/"} className="site-logo">
         CampusForge
       </Link>
       <nav className="site-nav">
@@ -33,6 +57,20 @@ export function SiteHeader() {
           </Link>
         ))}
       </nav>
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <button
+          onClick={switchLocale}
+          className="btn btn-ghost btn-sm"
+          style={{ minWidth: 44 }}
+        >
+          {locale === "en" ? "中文" : "EN"}
+        </button>
+        {isLoggedIn && (
+          <button onClick={handleLogout} className="btn btn-ghost btn-sm">
+            {t("common.logout")}
+          </button>
+        )}
+      </div>
     </header>
   );
 }
