@@ -5,11 +5,18 @@
 ```bash
 pnpm install
 cp .env.example .env
-pnpm docker:up
-pnpm db:generate
-pnpm db:migrate
-pnpm db:seed
 pnpm dev
+```
+
+`pnpm dev` uses Turborepo to start the web and API apps in parallel.
+
+When you start working on features that need a database or Redis:
+
+```bash
+pnpm docker:up          # start PostgreSQL + Redis
+pnpm db:generate        # generate Prisma client
+pnpm db:migrate         # run migrations
+pnpm db:seed            # seed data
 ```
 
 ## Branches

@@ -5,11 +5,16 @@
 ```bash
 pnpm install
 cp .env.example .env
+pnpm dev
+```
+
+当功能涉及数据库或 Redis 时：
+
+```bash
 pnpm docker:up
 pnpm db:generate
 pnpm db:migrate
 pnpm db:seed
-pnpm dev
 ```
 
 ## 生产环境建议

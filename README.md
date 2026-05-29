@@ -45,10 +45,6 @@ campusforge/
 ```bash
 pnpm install
 cp .env.example .env
-pnpm docker:up
-pnpm db:generate
-pnpm db:migrate
-pnpm db:seed
 pnpm dev
 ```
 
@@ -56,7 +52,6 @@ pnpm dev
 
 - Web: `http://localhost:3000`
 - API: `http://localhost:4000/v1`
-- PostgreSQL: `localhost:5432`
 
 ## Git 提交规范
 
