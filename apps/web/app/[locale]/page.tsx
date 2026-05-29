@@ -38,29 +38,29 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="page" style={{ maxWidth: 480, margin: "0 auto" }}>
-      <div style={{ padding: "80px 0" }}>
-        <div className="glass-card" style={{ padding: 40 }}>
-          <h1
-            style={{
-              fontSize: "1.6rem",
-              fontWeight: 700,
-              marginBottom: 8,
-              textAlign: "center",
-            }}
-          >
+    <main className="page auth-page">
+      <section className="auth-hero" aria-labelledby="login-title">
+        <div className="auth-copy">
+          <div className="auth-kicker">{t("applyLink")}</div>
+          <h1 id="login-title" className="auth-title">
             {t("title")}
           </h1>
-          <p
-            style={{
-              color: "var(--text-500)",
-              fontSize: "0.9rem",
-              textAlign: "center",
-              marginBottom: 32,
-            }}
-          >
-            {t("subtitle")}
-          </p>
+          <p className="auth-lede">{t("subtitle")}</p>
+          <div className="auth-proof-grid" aria-label={t("title")}>
+            <span>{tc("browseResources")}</span>
+            <span>{t("checkStatus")}</span>
+            <span>{tc("requestInvitation")}</span>
+          </div>
+        </div>
+
+        <div className="glass-card auth-card">
+          <div className="auth-card-heading">
+            <span className="auth-card-icon" aria-hidden="true" />
+            <div>
+              <h2>{tc("login")}</h2>
+              <p>{t("subtitle")}</p>
+            </div>
+          </div>
 
           <form
             onSubmit={handleLogin}
@@ -106,7 +106,7 @@ export default function LoginPage() {
 
           <div
             style={{
-              marginTop: 24,
+              marginTop: 28,
               textAlign: "center",
               fontSize: "0.85rem",
               color: "var(--text-500)",
@@ -129,7 +129,7 @@ export default function LoginPage() {
             </span>
           </div>
         </div>
-      </div>
+      </section>
     </main>
   );
 }

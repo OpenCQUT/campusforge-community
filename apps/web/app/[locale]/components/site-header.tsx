@@ -61,7 +61,13 @@ export function SiteHeader() {
         href={isLoggedIn ? (isAdmin ? "/admin" : "/resources") : "/"}
         className="site-logo"
       >
-        CampusForge
+        <span className="site-logo-mark" aria-hidden="true">
+          <span />
+        </span>
+        <span>
+          <strong>CampusForge</strong>
+          <small>Open source community</small>
+        </span>
       </Link>
       <nav className="site-nav">
         {navItems.map((item) => (
