@@ -7,7 +7,7 @@
     "dev": "next dev --port 3000",
     "build": "next build",
     "start": "next start --port 3000",
-    "lint": "next lint || true",
+    "lint": "eslint app",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "echo 'web: no tests yet'"
   },
@@ -17,9 +17,12 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@next/eslint-plugin-next": "^16.2.6",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "typescript": "^5.8.0"
+    "eslint": "^10.4.0",
+    "typescript": "^5.8.0",
+    "typescript-eslint": "^8.60.0"
   }
 }
