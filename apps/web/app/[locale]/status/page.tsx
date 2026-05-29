@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { getApplicationByEmail } from "@/lib/application-store";
 
 interface Application {
   id: string;
@@ -43,7 +44,14 @@ export default function StatusPage() {
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
-    const found = MOCK_DB[email.trim().toLowerCase()];
+    const trimmed = email.trim().toLowerCase();
+    // Check shared store first (new submissions), then mock DB
+    const stored = getApplicationByEmail(trimmed);
+    if (stored) {
+      setResult({ ...stored, schoolEmail: stored.email });
+      return;
+    }
+    const found = MOCK_DB[trimmed];
     setResult(found ?? "not-found");
   }
 

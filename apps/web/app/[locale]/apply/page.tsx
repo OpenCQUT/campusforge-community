@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { addApplication } from "@/lib/application-store";
 
 export default function ApplyPage() {
   const t = useTranslations("apply");
@@ -29,7 +30,7 @@ export default function ApplyPage() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!validate()) return;
-    // In production this would call the API
+    addApplication({ email: email.trim(), studentId: studentId.trim(), department: department.trim(), reason: reason.trim() });
     setSubmitted(true);
   }
 

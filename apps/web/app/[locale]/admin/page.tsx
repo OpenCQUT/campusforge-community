@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { getAllApplications, updateApplication, type StoredApplication } from "@/lib/application-store";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -152,8 +153,17 @@ export default function AdminPage() {
     setTimeout(() => setToast(null), 2500);
   }, []);
 
-  // Data state
-  const [applications, setApplications] = useState(() => applicationsData(locale));
+  // Data state — merge shared store (new submissions) with mock data
+  const [applications, setApplications] = useState<Application[]>(() => {
+    const stored = getAllApplications().map((a: StoredApplication) => ({
+      id: a.id, name: a.name, email: a.email, studentId: a.studentId,
+      department: a.department, reason: a.reason, status: a.status, date: a.submittedAt, reviewNote: a.reviewNote,
+    }));
+    const mock = applicationsData(locale);
+    // Deduplicate by email
+    const mockFiltered = mock.filter((m) => !stored.some((s) => s.email.toLowerCase() === m.email.toLowerCase()));
+    return [...stored, ...mockFiltered];
+  });
   const [members, setMembers] = useState(() => membersData(locale));
   const [invitations, setInvitations] = useState(() => invitationsData(locale));
   const [courses, setCourses] = useState(() => coursesData(locale));
@@ -181,6 +191,7 @@ export default function AdminPage() {
     if (!selectedApp) return;
     const label = status === "APPROVED" ? t("approved") : status === "REJECTED" ? t("rejected") : t("infoRequested");
     setApplications((prev) => prev.map((a) => a.id === selectedApp.id ? { ...a, status, reviewNote } : a));
+    updateApplication(selectedApp.id, { status, reviewNote });
     addAuditEntry(`${status} application`, `${selectedApp.name} (${selectedApp.id})`);
     setSelectedApp(null); setReviewNote("");
     showToast(status === "APPROVED" ? "success" : status === "REJECTED" ? "danger" : "info", label);
