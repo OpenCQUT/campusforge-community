@@ -6,5 +6,6 @@ and application layout so the product UI can be implemented on top of a clean fr
 ## Local development
 
 ```bash
+cp ../../config.example.toml ../../config.toml
 pnpm --filter @campusforge/web dev
 ```

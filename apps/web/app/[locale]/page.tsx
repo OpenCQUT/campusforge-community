@@ -3,15 +3,6 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
-import { config } from "@/lib/config";
-
-function getAccounts(): Record<string, { password: string; role: string }> {
-  const accounts: Record<string, { password: string; role: string }> = {};
-  if (config.admin.email && config.admin.password) {
-    accounts[config.admin.email.toLowerCase()] = { password: config.admin.password, role: "admin" };
-  }
-  return accounts;
-}
 
 export default function LoginPage() {
   const t = useTranslations("login");
@@ -21,20 +12,27 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function handleLogin(e: React.FormEvent) {
+  async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    setIsSubmitting(true);
 
-    const account = getAccounts()[email.trim().toLowerCase()];
-    if (!account || account.password !== password) {
+    const response = await fetch("/api/session", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    setIsSubmitting(false);
+
+    if (!response.ok) {
       setError(t("invalidCredentials"));
       return;
     }
 
-    document.cookie = `cf_session=${account.role}; path=/; max-age=86400`;
-    document.cookie = `cf_email=${encodeURIComponent(email.trim().toLowerCase())}; path=/; max-age=86400`;
-    router.push(account.role === "admin" ? "/admin" : "/resources");
+    router.push("/admin");
   }
 
   return (
@@ -98,6 +96,7 @@ export default function LoginPage() {
             <button
               type="submit"
               className="btn btn-primary"
+              disabled={isSubmitting}
               style={{ width: "100%" }}
             >
               {tc("login")}

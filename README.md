@@ -45,6 +45,7 @@ campusforge/
 ```bash
 pnpm install
 cp .env.example .env
+cp config.example.toml config.toml
 pnpm dev
 ```
 

@@ -1,0 +1,6 @@
+[admin]
+email = "test@admin.edu"
+password = "123456"
+
+[app]
+debug = true
