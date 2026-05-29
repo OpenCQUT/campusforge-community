@@ -27,6 +27,7 @@ export function SiteHeader() {
     { href: "/resources", label: t("nav.resources") },
     { href: "/courses", label: t("nav.courses") },
     { href: "/policies", label: t("nav.policies") },
+    { href: "/profile", label: t("nav.profile") },
   ];
 
   const adminNav = [
@@ -34,6 +35,7 @@ export function SiteHeader() {
     { href: "/resources", label: t("nav.resources") },
     { href: "/courses", label: t("nav.courses") },
     { href: "/policies", label: t("nav.policies") },
+    { href: "/profile", label: t("nav.profile") },
   ];
 
   const navItems = !isLoggedIn
@@ -49,12 +51,16 @@ export function SiteHeader() {
 
   function handleLogout() {
     document.cookie = "cf_session=; path=/; max-age=0";
+    document.cookie = "cf_email=; path=/; max-age=0";
     router.push("/");
   }
 
   return (
     <header className="site-header">
-      <Link href={isLoggedIn ? (isAdmin ? "/admin" : "/resources") : "/"} className="site-logo">
+      <Link
+        href={isLoggedIn ? (isAdmin ? "/admin" : "/resources") : "/"}
+        className="site-logo"
+      >
         CampusForge
       </Link>
       <nav className="site-nav">

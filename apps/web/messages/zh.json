@@ -19,7 +19,8 @@
     "resources": "资源",
     "courses": "课程",
     "policies": "制度",
-    "admin": "管理"
+    "admin": "管理",
+    "profile": "个人"
   },
   "login": {
     "title": "欢迎来到 CampusForge",
@@ -199,6 +200,19 @@
     "colTarget": "目标",
     "colTime": "时间",
     "noAudit": "暂无审计记录。"
+  },
+  "profile": {
+    "title": "个人中心",
+    "accountInfo": "账号信息",
+    "email": "邮箱",
+    "role": "角色",
+    "myApplication": "我的申请",
+    "noApplication": "您还没有提交申请。",
+    "applyNow": "立即申请",
+    "quickLinks": "快捷入口",
+    "viewResources": "查看资源",
+    "viewCourses": "查看课程",
+    "checkStatus": "查看申请状态"
   },
   "statusLabel": {
     "SUBMITTED": "已提交",

@@ -28,6 +28,7 @@ export default function LoginPage() {
     }
 
     document.cookie = `cf_session=${account.role}; path=/; max-age=86400`;
+    document.cookie = `cf_email=${encodeURIComponent(email.trim().toLowerCase())}; path=/; max-age=86400`;
     router.push(account.role === "admin" ? "/admin" : "/resources");
   }
 

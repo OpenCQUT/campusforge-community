@@ -19,7 +19,8 @@
     "resources": "Resources",
     "courses": "Courses",
     "policies": "Policies",
-    "admin": "Admin"
+    "admin": "Admin",
+    "profile": "Profile"
   },
   "login": {
     "title": "Welcome to CampusForge",
@@ -199,6 +200,19 @@
     "colTarget": "Target",
     "colTime": "Time",
     "noAudit": "No audit entries yet."
+  },
+  "profile": {
+    "title": "My Profile",
+    "accountInfo": "Account Information",
+    "email": "Email",
+    "role": "Role",
+    "myApplication": "My Application",
+    "noApplication": "You haven't submitted an application yet.",
+    "applyNow": "Apply Now",
+    "quickLinks": "Quick Links",
+    "viewResources": "View Resources",
+    "viewCourses": "View Courses",
+    "checkStatus": "Check Application Status"
   },
   "statusLabel": {
     "SUBMITTED": "Submitted",
