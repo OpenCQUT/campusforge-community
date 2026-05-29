@@ -13,6 +13,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -37,97 +38,109 @@ export default function LoginPage() {
 
   return (
     <main className="page auth-page">
-      <section className="auth-hero" aria-labelledby="login-title">
+      <section
+        className={`auth-hero ${showLogin ? "auth-hero-login" : "auth-hero-landing"}`}
+        aria-labelledby="login-title"
+      >
         <div className="auth-copy">
-          <div className="auth-kicker">{t("applyLink")}</div>
           <h1 id="login-title" className="auth-title">
             {t("title")}
           </h1>
-          <p className="auth-lede">{t("subtitle")}</p>
-          <div className="auth-proof-grid" aria-label={t("title")}>
-            <span>{tc("browseResources")}</span>
-            <span>{t("checkStatus")}</span>
-            <span>{tc("requestInvitation")}</span>
-          </div>
+          {!showLogin && (
+            <div className="auth-actions" aria-label={t("title")}>
+              <button
+                type="button"
+                className="btn btn-primary auth-action"
+                onClick={() => setShowLogin(true)}
+              >
+                {tc("login")}
+              </button>
+              <Link href="/apply" className="btn btn-ghost auth-action">
+                {tc("requestInvitation")}
+              </Link>
+            </div>
+          )}
         </div>
 
-        <div className="glass-card auth-card">
-          <div className="auth-card-heading">
-            <span className="auth-card-icon" aria-hidden="true" />
-            <div>
-              <h2>{tc("login")}</h2>
-              <p>{t("subtitle")}</p>
-            </div>
-          </div>
-
-          <form
-            onSubmit={handleLogin}
-            style={{ display: "flex", flexDirection: "column", gap: 20 }}
-          >
-            <div className="field">
-              <label htmlFor="email">{t("emailLabel")}</label>
-              <input
-                id="email"
-                type="email"
-                placeholder={t("emailPlaceholder")}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div className="field">
-              <label htmlFor="password">{t("passwordLabel")}</label>
-              <input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+        {showLogin && (
+          <div className="glass-card auth-card">
+            <div className="auth-card-heading">
+              <span className="auth-card-icon" aria-hidden="true" />
+              <div>
+                <h2>{tc("login")}</h2>
+                <p>{t("subtitle")}</p>
+              </div>
             </div>
 
-            {error && (
-              <p style={{ color: "var(--danger)", fontSize: "0.85rem", margin: 0 }}>
-                {error}
-              </p>
-            )}
-
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={isSubmitting}
-              style={{ width: "100%" }}
+            <form
+              onSubmit={handleLogin}
+              style={{ display: "flex", flexDirection: "column", gap: 20 }}
             >
-              {tc("login")}
-            </button>
-          </form>
+              <div className="field">
+                <label htmlFor="email">{t("emailLabel")}</label>
+                <input
+                  id="email"
+                  type="email"
+                  placeholder={t("emailPlaceholder")}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="field">
+                <label htmlFor="password">{t("passwordLabel")}</label>
+                <input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
 
-          <div
-            style={{
-              marginTop: 28,
-              textAlign: "center",
-              fontSize: "0.85rem",
-              color: "var(--text-500)",
-              display: "flex",
-              flexDirection: "column",
-              gap: 8,
-            }}
-          >
-            <span>
-              {t("noAccount")}{" "}
-              <Link href="/apply" style={{ color: "var(--cyan)" }}>
-                {t("applyLink")}
-              </Link>
-            </span>
-            <span>
-              {t("checkStatus")}{" "}
-              <Link href="/status" style={{ color: "var(--cyan)" }}>
-                {t("statusLink")}
-              </Link>
-            </span>
+              {error && (
+                <p style={{ color: "var(--danger)", fontSize: "0.85rem", margin: 0 }}>
+                  {error}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={isSubmitting}
+                style={{ width: "100%" }}
+              >
+                {tc("login")}
+              </button>
+            </form>
+
+            <div
+              style={{
+                marginTop: 28,
+                textAlign: "center",
+                fontSize: "0.85rem",
+                color: "var(--text-500)",
+                display: "flex",
+                flexDirection: "column",
+                gap: 8,
+              }}
+            >
+              <span>
+                {t("noAccount")}{" "}
+                <Link href="/apply" style={{ color: "var(--cyan)" }}>
+                  {t("applyLink")}
+                </Link>
+              </span>
+              <span>
+                {t("checkStatus")}{" "}
+                <Link href="/status" style={{ color: "var(--cyan)" }}>
+                  {t("statusLink")}
+                </Link>
+              </span>
+            </div>
           </div>
-        </div>
+        )}
       </section>
     </main>
   );

@@ -61,24 +61,17 @@ export default function StatusPage() {
   ];
 
   return (
-    <main className="page">
-      <div className="page-header">
+    <main className={`page status-page ${result ? "status-page-has-result" : "status-page-empty"}`}>
+      <div className="page-header status-page-header">
         <h1 className="page-title">{t("title")}</h1>
         <p className="page-subtitle">{t("subtitle")}</p>
       </div>
 
-      {/* Search form */}
       <form
         onSubmit={handleSearch}
-        style={{
-          display: "flex",
-          gap: 12,
-          alignItems: "flex-end",
-          maxWidth: 520,
-          marginBottom: 32,
-        }}
+        className="glass-card status-search-card"
       >
-        <div className="field" style={{ flex: 1 }}>
+        <div className="field">
           <label htmlFor="lookup-email">{t("searchLabel")}</label>
           <input
             id="lookup-email"
@@ -97,10 +90,8 @@ export default function StatusPage() {
       {/* Not found */}
       {result === "not-found" && (
         <div
-          className="glass-card"
+          className="glass-card status-message-card"
           style={{
-            padding: 24,
-            maxWidth: 520,
             borderColor: "rgba(255,95,125,0.3)",
           }}
         >
@@ -112,7 +103,7 @@ export default function StatusPage() {
 
       {/* Result */}
       {result && result !== "not-found" && (
-        <div className="grid-2">
+        <div className="grid-2 status-result-grid">
           <div className="glass-card" style={{ padding: 32 }}>
             <h2
               style={{

@@ -81,8 +81,8 @@ export default function ApplyPage() {
   }
 
   return (
-    <main className="page">
-      <div className="page-header">
+    <main className="page apply-page">
+      <div className="page-header apply-page-header">
         <h1 className="page-title">{t("title")}</h1>
         <p className="page-subtitle">{t("subtitle")}</p>
       </div>
@@ -129,8 +129,8 @@ export default function ApplyPage() {
           </div>
         </div>
 
-        <aside className="apply-sidebar">
-          <div className="glass-card info-card">
+        <aside className="apply-sidebar" aria-label={t("whatNext")}>
+          <div className="info-card apply-info-card">
             <h3>{t("whatNext")}</h3>
             <p>{t("whatNextDesc")}</p>
             <ul>
@@ -139,7 +139,7 @@ export default function ApplyPage() {
               <li>{t("step3")}</li>
             </ul>
           </div>
-          <div className="glass-card info-card" style={{ marginTop: 16 }}>
+          <div className="info-card apply-info-card">
             <h3>{t("eligibility")}</h3>
             <p>{t("eligibilityDesc")}</p>
           </div>
