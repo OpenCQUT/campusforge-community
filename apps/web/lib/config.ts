@@ -9,8 +9,4 @@ export const config = {
     password: process.env.NEXT_PUBLIC_ADMIN_PASSWORD ?? "",
   },
   debug: process.env.NEXT_PUBLIC_DEBUG === "true",
-  allowedEmailDomains: (process.env.NEXT_PUBLIC_ALLOWED_EMAIL_DOMAINS ?? "")
-    .split(",")
-    .map((d) => d.trim().toLowerCase())
-    .filter(Boolean),
 } as const;

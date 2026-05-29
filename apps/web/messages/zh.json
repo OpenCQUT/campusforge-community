@@ -76,8 +76,7 @@
     "submitAnother": "再次提交",
     "fieldRequired": "此项为必填。",
     "reasonTooShort": "请至少填写 10 个字符。",
-    "emailInvalid": "请输入有效的邮箱地址。",
-    "emailDomain": "请使用学校邮箱地址。"
+    "emailInvalid": "请输入有效的邮箱地址。"
   },
   "status": {
     "title": "申请状态",

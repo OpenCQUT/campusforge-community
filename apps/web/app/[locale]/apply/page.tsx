@@ -21,11 +21,8 @@ export default function ApplyPage() {
     const e: Record<string, string> = {};
     if (!email.trim()) {
       e.email = t("fieldRequired");
-    } else {
-      const result = validateEmail(email);
-      if (!result.ok) {
-        e.email = result.error === "format" ? t("emailInvalid") : t("emailDomain");
-      }
+    } else if (!validateEmail(email).ok) {
+      e.email = t("emailInvalid");
     }
     if (!studentId.trim()) e.studentId = t("fieldRequired");
     if (!department.trim()) e.department = t("fieldRequired");

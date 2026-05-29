@@ -76,8 +76,7 @@
     "submitAnother": "Submit Another",
     "fieldRequired": "This field is required.",
     "reasonTooShort": "Please write at least 10 characters.",
-    "emailInvalid": "Please enter a valid email address.",
-    "emailDomain": "Please use your school email address."
+    "emailInvalid": "Please enter a valid email address."
   },
   "status": {
     "title": "Application Status",
