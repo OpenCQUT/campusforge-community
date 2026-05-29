@@ -32,13 +32,13 @@ export default function PoliciesPage() {
   const policies = getPolicies(locale);
 
   return (
-    <main className="page">
+    <main className="page page-fixed">
       <div className="page-header">
         <h1 className="page-title">{t("title")}</h1>
         <p className="page-subtitle">{t("subtitle")}</p>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      <div className="page-scroll-panel policy-list">
         {policies.map((p) => (
           <div key={p.title} className="glass-card policy-card">
             <div

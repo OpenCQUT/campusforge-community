@@ -46,50 +46,52 @@ export default function ResourcesPage() {
   const filtered = filter ? items.filter((r) => r.type === filter) : items;
 
   return (
-    <main className="page">
+    <main className="page page-fixed">
       <div className="page-header">
         <h1 className="page-title">{t("title")}</h1>
         <p className="page-subtitle">{t("subtitle")}</p>
       </div>
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 24, flexWrap: "wrap" }}>
-        <button
-          className={`btn btn-sm ${filter === null ? "btn-primary" : "btn-ghost"}`}
-          onClick={() => setFilter(null)}
-        >
-          {tc("all")}
-        </button>
-        {TYPES.map((type) => (
+      <div className="page-scroll-panel">
+        <div className="filter-row">
           <button
-            key={type}
-            className={`btn btn-sm ${filter === type ? "btn-primary" : "btn-ghost"}`}
-            onClick={() => setFilter(type)}
+            className={`btn btn-sm ${filter === null ? "btn-primary" : "btn-ghost"}`}
+            onClick={() => setFilter(null)}
           >
-            {type}
+            {tc("all")}
           </button>
-        ))}
-      </div>
-
-      {filtered.length === 0 ? (
-        <div className="glass-card" style={{ padding: 40, textAlign: "center" }}>
-          <p style={{ color: "var(--text-500)" }}>{tc("all")}</p>
-        </div>
-      ) : (
-        <div className="grid-3">
-          {filtered.map((r) => (
-            <div key={r.title} className="glass-card content-card">
-              <div className="content-meta">
-                <span className={`tag ${typeColors[r.type] ?? "tag-muted"}`}>{r.type}</span>
-              </div>
-              <h3>{r.title}</h3>
-              <p>{r.desc}</p>
-              <div className="content-meta">
-                <span>{tc("updated", { date: r.date })}</span>
-              </div>
-            </div>
+          {TYPES.map((type) => (
+            <button
+              key={type}
+              className={`btn btn-sm ${filter === type ? "btn-primary" : "btn-ghost"}`}
+              onClick={() => setFilter(type)}
+            >
+              {type}
+            </button>
           ))}
         </div>
-      )}
+
+        {filtered.length === 0 ? (
+          <div className="glass-card" style={{ padding: 40, textAlign: "center" }}>
+            <p style={{ color: "var(--text-500)" }}>{tc("all")}</p>
+          </div>
+        ) : (
+          <div className="grid-3">
+            {filtered.map((r) => (
+              <div key={r.title} className="glass-card content-card">
+                <div className="content-meta">
+                  <span className={`tag ${typeColors[r.type] ?? "tag-muted"}`}>{r.type}</span>
+                </div>
+                <h3>{r.title}</h3>
+                <p>{r.desc}</p>
+                <div className="content-meta">
+                  <span>{tc("updated", { date: r.date })}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </main>
   );
 }

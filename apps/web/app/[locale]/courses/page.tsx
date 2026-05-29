@@ -397,34 +397,35 @@ export default function CoursesPage() {
   const filtered = filter ? courses.filter((c) => c.category === filter) : courses;
 
   return (
-    <main className="page">
+    <main className="page page-fixed">
       <div className="page-header">
         <h1 className="page-title">{t("title")}</h1>
         <p className="page-subtitle">{t("subtitle")}</p>
       </div>
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 24, flexWrap: "wrap" }}>
-        {CATEGORIES.map((cat) => (
-          <button
-            key={cat.labelKey}
-            className={`btn btn-sm ${filter === cat.key ? "btn-primary" : "btn-ghost"}`}
-            onClick={() => setFilter(cat.key)}
-          >
-            {t(cat.labelKey)}
-          </button>
-        ))}
-      </div>
-
-      {filtered.length === 0 ? (
-        <div className="glass-card" style={{ padding: 40, textAlign: "center" }}>
-          <p style={{ color: "var(--text-500)" }}>{t("noCourses")}</p>
+      <div className="page-scroll-panel">
+        <div className="filter-row">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat.labelKey}
+              className={`btn btn-sm ${filter === cat.key ? "btn-primary" : "btn-ghost"}`}
+              onClick={() => setFilter(cat.key)}
+            >
+              {t(cat.labelKey)}
+            </button>
+          ))}
         </div>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          {filtered.map((c) => {
-            const isOpen = expanded === c.title;
-            return (
-              <div key={c.title} className="glass-card" style={{ padding: 0, overflow: "hidden" }}>
+
+        {filtered.length === 0 ? (
+          <div className="glass-card" style={{ padding: 40, textAlign: "center" }}>
+            <p style={{ color: "var(--text-500)" }}>{t("noCourses")}</p>
+          </div>
+        ) : (
+          <div className="course-list">
+            {filtered.map((c) => {
+              const isOpen = expanded === c.title;
+              return (
+                <div key={c.title} className="glass-card" style={{ padding: 0, overflow: "hidden" }}>
                 {/* Card header */}
                 <div
                   style={{ padding: "20px 24px", cursor: "pointer" }}
@@ -478,11 +479,12 @@ export default function CoursesPage() {
                     </div>
                   </div>
                 )}
-              </div>
-            );
-          })}
-        </div>
-      )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </main>
   );
 }

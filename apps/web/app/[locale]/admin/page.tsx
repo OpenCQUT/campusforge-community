@@ -188,7 +188,7 @@ export default function AdminPage() {
   });
 
   return (
-    <main className="page">
+    <main className="page page-fixed admin-page">
       <div className="page-header">
         <h1 className="page-title">{t("title")}</h1>
         <p className="page-subtitle">{t("subtitle")}</p>
