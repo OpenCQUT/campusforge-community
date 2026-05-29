@@ -972,21 +972,31 @@ img {
 /* ─── Profile ──────────────────────────────────────────────────────────────── */
 
 .profile-page {
+  display: flex;
+  height: calc(100dvh - var(--header-h));
+  flex-direction: column;
   max-width: 1120px;
+  overflow: hidden;
 }
 
 .profile-layout {
   display: grid;
   grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
   gap: 24px;
-  align-items: start;
-  padding-bottom: 80px;
+  align-items: stretch;
+  flex: 1;
+  min-height: 0;
+  padding-bottom: 24px;
 }
 
 .profile-sidebar {
   display: flex;
+  min-height: 0;
+  height: 100%;
+  max-height: 100%;
   flex-direction: column;
   gap: 20px;
+  overflow: auto;
 }
 
 .profile-card {
@@ -1103,13 +1113,20 @@ img {
 }
 
 .profile-github-card {
+  display: flex;
   min-width: 0;
+  height: 100%;
+  max-height: 100%;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .profile-section-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+  flex: none;
   gap: 16px;
   margin-bottom: 24px;
 }
@@ -1135,6 +1152,13 @@ img {
   padding: 18px 0 20px;
   border-top: 1px solid rgba(125, 150, 255, 0.08);
   border-bottom: 1px solid rgba(125, 150, 255, 0.08);
+}
+
+.profile-github-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 8px;
 }
 
 .profile-graph-panel {
@@ -1222,6 +1246,18 @@ img {
 
   .profile-layout {
     grid-template-columns: 1fr;
+  }
+
+  .profile-page {
+    height: auto;
+    overflow: visible;
+  }
+
+  .profile-sidebar,
+  .profile-github-card,
+  .profile-github-scroll {
+    max-height: none;
+    overflow: visible;
   }
 
   .admin-sidebar {

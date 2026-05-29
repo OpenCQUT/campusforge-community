@@ -418,7 +418,7 @@ export default function ProfilePage() {
               <button className="btn btn-ghost btn-sm" onClick={handleDisconnect}>{t("disconnect")}</button>
             </div>
           ) : ghStats ? (
-            <>
+            <div className="profile-github-scroll">
               {/* Total contributions */}
               <div className="profile-stat-row profile-github-total">
                 <StatBlock label={t("totalContributions")} value={ghStats.totalContributions} />
@@ -453,7 +453,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
               )}
-            </>
+            </div>
           ) : null}
         </section>
       </div>
