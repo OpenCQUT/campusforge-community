@@ -20,6 +20,8 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile=false
       - run: pnpm db:generate
+        env:
+          DATABASE_URL: postgresql://localhost:5432/campusforge
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
