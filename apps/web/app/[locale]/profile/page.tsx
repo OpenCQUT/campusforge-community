@@ -3,9 +3,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { getApplicationByEmail, type StoredApplication } from "@/lib/application-store";
 import { getCourseProgress, type CourseProgress } from "@/lib/learning-store";
+
 import { config } from "@/lib/config";
+
 
 // ─── Session helpers ────────────────────────────────────────────────────────
 
@@ -14,7 +15,6 @@ function getAccountName(email: string): string {
   return email.split("@")[0] ?? email;
 }
 
-const MOCK_DB: Record<string, StoredApplication> = {};
 
 function getSessionEmail(): string | null {
   if (typeof document === "undefined") return null;
@@ -40,15 +40,15 @@ interface GitHubStats {
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
+
 export default function ProfilePage() {
   const t = useTranslations("profile");
-  const ts = useTranslations("statusLabel");
 
   const email = getSessionEmail() ?? "unknown";
   const role = getSessionRole() ?? "member";
   const displayName = getAccountName(email);
 
-  const application = getApplicationByEmail(email) ?? MOCK_DB[email] ?? null;
+
 
   // GitHub state
   const [ghUsername, setGhUsername] = useState(() => {
@@ -160,28 +160,10 @@ export default function ProfilePage() {
             <Row label={t("email")} value={email} />
             <Row label={t("role")} value={<span className={`tag ${role === "admin" ? "tag-cyan" : "tag-blue"}`}>{role.toUpperCase()}</span>} />
           </div>
+
+
         </div>
 
-        {/* ── Application Status ──────────────────────────────── */}
-        <div className="glass-card" style={{ padding: 28 }}>
-          <h2 style={{ fontSize: "1rem", fontWeight: 700, marginBottom: 16 }}>{t("myApplication")}</h2>
-          {application ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <Row label={t("role")} value={<span className={`status status-${application.status.toLowerCase().replace("_", "-")}`}>{ts(application.status)}</span>} />
-              {application.submittedAt && <Row label="Submitted" value={application.submittedAt} />}
-              {application.department && <Row label="Department" value={application.department} />}
-              {application.reviewNote && <Row label="Review Note" value={application.reviewNote} />}
-              <div style={{ marginTop: 8 }}><Link href="/status" className="btn btn-ghost btn-sm">{t("checkStatus")}</Link></div>
-            </div>
-          ) : (
-            <div>
-              <p style={{ color: "var(--text-500)", fontSize: "0.9rem", marginBottom: 16 }}>{t("noApplication")}</p>
-              <Link href="/apply" className="btn btn-primary btn-sm">{t("applyNow")}</Link>
-            </div>
-          )}
-        </div>
-
-        {/* ── Learning Progress ───────────────────────────────── */}
         <div className="glass-card" style={{ padding: 28 }}>
           <h2 style={{ fontSize: "1rem", fontWeight: 700, marginBottom: 16 }}>{t("learning")}</h2>
           {startedCount > 0 ? (
