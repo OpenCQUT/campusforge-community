@@ -83,6 +83,8 @@ interface ServerConfigForm {
   };
   logging: {
     level: LogLevel;
+    retentionDays: number;
+    maxFileMb: number;
   };
 }
 
@@ -126,6 +128,8 @@ const defaultServerConfig: ServerConfigForm = {
   },
   logging: {
     level: "info",
+    retentionDays: 14,
+    maxFileMb: 5,
   },
 };
 
@@ -396,7 +400,10 @@ export default function AdminPage() {
     }));
   }
 
-  function updateLoggingConfig(field: keyof ServerConfigForm["logging"], value: LogLevel) {
+  function updateLoggingConfig(
+    field: keyof ServerConfigForm["logging"],
+    value: LogLevel | number,
+  ) {
     setServerConfig((current) => ({
       ...current,
       logging: {
@@ -790,19 +797,43 @@ export default function AdminPage() {
                   </ConfigSection>
 
                   <ConfigSection title={t("loggingSettingsTitle")} subtitle={t("loggingSettingsSubtitle")}>
-                    <div className="field">
-                      <label htmlFor="log-level">{t("logLevel")}</label>
-                      <select
-                        id="log-level"
-                        value={serverConfig.logging.level}
-                        onChange={(event) => updateLoggingConfig("level", event.target.value as LogLevel)}
-                        disabled={configStatus === "loading"}
-                      >
-                        <option value="debug">debug</option>
-                        <option value="info">info</option>
-                        <option value="warn">warn</option>
-                        <option value="error">error</option>
-                      </select>
+                    <div className="form-row">
+                      <div className="field">
+                        <label htmlFor="log-level">{t("logLevel")}</label>
+                        <select
+                          id="log-level"
+                          value={serverConfig.logging.level}
+                          onChange={(event) => updateLoggingConfig("level", event.target.value as LogLevel)}
+                          disabled={configStatus === "loading"}
+                        >
+                          <option value="debug">debug</option>
+                          <option value="info">info</option>
+                          <option value="warn">warn</option>
+                          <option value="error">error</option>
+                        </select>
+                      </div>
+                      <div className="field">
+                        <label htmlFor="log-retention-days">{t("logRetentionDays")}</label>
+                        <input
+                          id="log-retention-days"
+                          type="number"
+                          min={1}
+                          value={serverConfig.logging.retentionDays}
+                          onChange={(event) => updateLoggingConfig("retentionDays", Number(event.target.value))}
+                          disabled={configStatus === "loading"}
+                        />
+                      </div>
+                      <div className="field">
+                        <label htmlFor="log-max-file-mb">{t("logMaxFileMb")}</label>
+                        <input
+                          id="log-max-file-mb"
+                          type="number"
+                          min={1}
+                          value={serverConfig.logging.maxFileMb}
+                          onChange={(event) => updateLoggingConfig("maxFileMb", Number(event.target.value))}
+                          disabled={configStatus === "loading"}
+                        />
+                      </div>
                     </div>
                   </ConfigSection>
 

@@ -41,6 +41,8 @@ interface ConfigBody {
   };
   logging?: {
     level?: unknown;
+    retentionDays?: unknown;
+    maxFileMb?: unknown;
   };
 }
 
@@ -207,6 +209,14 @@ export async function PUT(request: Request) {
         logging.level === "error"
           ? logging.level
           : "info",
+      retentionDays: Math.max(
+        1,
+        numberFrom(logging.retentionDays, config.logging.retentionDays),
+      ),
+      maxFileMb: Math.max(
+        1,
+        numberFrom(logging.maxFileMb, config.logging.maxFileMb),
+      ),
     },
   };
 
@@ -215,6 +225,7 @@ export async function PUT(request: Request) {
     adminEmails: adminEmails.length,
     emailMode: nextRuntime.email?.mode ?? null,
     logLevel: nextRuntime.logging?.level ?? null,
+    logRetentionDays: nextRuntime.logging?.retentionDays ?? null,
   });
   return NextResponse.json(publicConfig(loadServerConfig()));
 }

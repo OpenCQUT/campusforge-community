@@ -258,6 +258,8 @@
     "loggingSettingsTitle": "日志",
     "loggingSettingsSubtitle": "控制服务器文件日志等级，并在管理后台显示错误。",
     "logLevel": "日志等级",
+    "logRetentionDays": "常规日志保留天数",
+    "logMaxFileMb": "常规日志轮转大小（MB）",
     "configured": "已配置",
     "notConfigured": "未配置",
     "storageSettingsTitle": "存储路径",

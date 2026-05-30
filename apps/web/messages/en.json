@@ -258,6 +258,8 @@
     "loggingSettingsTitle": "Logging",
     "loggingSettingsSubtitle": "Control server file log level and surface errors in the admin console.",
     "logLevel": "Log Level",
+    "logRetentionDays": "App Log Retention Days",
+    "logMaxFileMb": "App Log Rotation Size (MB)",
     "configured": "Configured",
     "notConfigured": "Not configured",
     "storageSettingsTitle": "Storage Paths",

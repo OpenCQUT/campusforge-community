@@ -80,9 +80,10 @@ pass = "smtp-password"
 写入 `data_dir/runtime-config.json`，SMTP 密码不会在接口响应中回显；密码字段留空表示保留
 当前值。
 
-日志等级依赖 `config.toml` 或运行时配置的 `[logging].level`，默认 `info`。Web 服务会写入
-`log_dir/app.log`，错误会额外写入 `log_dir/error.log`，管理员后台的审计页会展示最近的
-错误日志。
+日志配置依赖 `config.toml` 或运行时配置的 `[logging]`，默认等级为 `info`。Web 服务会写入
+`log_dir/app.log`，错误会额外写入 `log_dir/error.log`，管理员后台的审计页会展示最近的错误
+日志。`app.log` 会按 `max_file_mb` 轮转并 gzip 压缩，压缩归档会按 `retention_days` 定期
+清理；`error.log` 不压缩、不自动清理。
 
 SMTP 的 `from` 必须符合邮件服务商策略。多数个人邮箱不能稳定伪造公司域名发件人，否则会被
 SPF/DKIM/DMARC 拦截或进入垃圾箱。没有公司邮箱时，建议使用个人邮箱地址或服务商允许的发件

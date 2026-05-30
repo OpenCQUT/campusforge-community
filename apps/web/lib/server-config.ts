@@ -38,6 +38,8 @@ export interface ServerConfig {
   };
   logging: {
     level: "debug" | "info" | "warn" | "error";
+    retentionDays: number;
+    maxFileMb: number;
   };
 }
 
@@ -80,6 +82,8 @@ const DEFAULT_CONFIG: ServerConfig = {
   },
   logging: {
     level: "info",
+    retentionDays: 14,
+    maxFileMb: 5,
   },
 };
 
@@ -253,6 +257,14 @@ export function loadServerConfig(): ServerConfig {
         },
         logging: {
           level: asLogLevel(parsed.logging?.level),
+          retentionDays: Math.max(
+            1,
+            asNumber(parsed.logging?.retention_days, DEFAULT_CONFIG.logging.retentionDays),
+          ),
+          maxFileMb: Math.max(
+            1,
+            asNumber(parsed.logging?.max_file_mb, DEFAULT_CONFIG.logging.maxFileMb),
+          ),
         },
       });
     } catch {

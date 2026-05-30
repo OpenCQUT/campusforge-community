@@ -38,3 +38,7 @@ resend_cooldown_seconds = 60
 [logging]
 # debug, info, warn, or error. info records normal operation and errors.
 level = "info"
+# Compressed app logs are removed after this many days. error.log is not compressed or removed.
+retention_days = 14
+# app.log is compressed and rotated when it reaches this size. error.log is not compressed.
+max_file_mb = 5

@@ -1,5 +1,16 @@
-import { appendFileSync, existsSync, mkdirSync, readFileSync } from "node:fs";
+import {
+  appendFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  renameSync,
+  statSync,
+  unlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { join } from "node:path";
+import { gzipSync } from "node:zlib";
 import type { ServerConfig } from "./server-config";
 
 export type LogLevel = ServerConfig["logging"]["level"];
@@ -18,6 +29,8 @@ const LEVELS: Record<LogLevel, number> = {
   warn: 30,
   error: 40,
 };
+const CLEANUP_INTERVAL_MS = 60 * 60 * 1000;
+let lastCleanupAt = 0;
 
 function shouldLog(config: ServerConfig, level: LogLevel): boolean {
   return LEVELS[level] >= LEVELS[config.logging.level];
@@ -25,6 +38,48 @@ function shouldLog(config: ServerConfig, level: LogLevel): boolean {
 
 function logPath(config: ServerConfig, file: string): string {
   return join(config.storage.logDir, file);
+}
+
+function timestampForFile(date = new Date()): string {
+  return date.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
+}
+
+function rotateAppLogIfNeeded(config: ServerConfig) {
+  const path = logPath(config, "app.log");
+  if (!existsSync(path)) return;
+
+  const maxBytes = config.logging.maxFileMb * 1024 * 1024;
+  if (statSync(path).size < maxBytes) return;
+
+  const rotated = logPath(config, `app-${timestampForFile()}.log`);
+  const compressed = `${rotated}.gz`;
+  renameSync(path, rotated);
+  writeFileSync(compressed, gzipSync(readFileSync(rotated)), { mode: 0o600 });
+  unlinkSync(rotated);
+}
+
+function cleanupCompressedAppLogs(config: ServerConfig) {
+  const now = Date.now();
+  if (now - lastCleanupAt < CLEANUP_INTERVAL_MS) return;
+  lastCleanupAt = now;
+
+  const cutoff = now - config.logging.retentionDays * 24 * 60 * 60 * 1000;
+  for (const file of readdirSync(config.storage.logDir)) {
+    if (!/^app-\d{8}T\d{6}Z\.log\.gz$/.test(file)) continue;
+    const path = logPath(config, file);
+    if (statSync(path).mtimeMs < cutoff) {
+      unlinkSync(path);
+    }
+  }
+}
+
+function maintainAppLog(config: ServerConfig) {
+  try {
+    rotateAppLogIfNeeded(config);
+    cleanupCompressedAppLogs(config);
+  } catch {
+    // Logging must not break request handling.
+  }
 }
 
 export function writeLog(
@@ -44,6 +99,7 @@ export function writeLog(
     ...(details ? { details } : {}),
   };
   mkdirSync(config.storage.logDir, { recursive: true });
+  maintainAppLog(config);
   const line = `${JSON.stringify(record)}\n`;
   appendFileSync(logPath(config, "app.log"), line, { mode: 0o600 });
   if (level === "error") {
