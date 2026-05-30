@@ -20,6 +20,7 @@ interface ConfigBody {
     token?: unknown;
     clientId?: unknown;
     clientSecret?: unknown;
+    proxy?: unknown;
   };
   app?: {
     debug?: unknown;
@@ -68,6 +69,8 @@ function publicConfig(config: ServerConfig) {
       clientId: config.github.clientId,
       clientSecret: "",
       clientSecretConfigured: Boolean(config.github.clientSecret),
+      proxy: config.github.proxy ? "<configured>" : "",
+      proxyConfigured: Boolean(config.github.proxy),
     },
     app: {
       debug: config.app.debug,
@@ -156,6 +159,10 @@ export async function PUT(request: Request) {
         typeof github.clientSecret === "string" && github.clientSecret.length > 0
           ? github.clientSecret
           : (existingRuntime.github?.clientSecret ?? config.github.clientSecret),
+      proxy:
+        typeof github.proxy === "string" && github.proxy.length > 0
+          ? github.proxy.trim()
+          : (existingRuntime.github?.proxy ?? config.github.proxy),
     },
     app: {
       ...existingRuntime.app,

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { loadServerConfig } from "@/lib/server-config";
 import { getIssueClaims } from "@/lib/issue-claim-store";
+import { githubFetch } from "@/lib/github-fetch";
 import { getSessionFromRequest, getSessionSecret } from "@/lib/session";
 
 interface GitHubSearchIssue {
@@ -42,7 +43,8 @@ export async function GET(request: Request) {
 
   const org = config.github.org || "OpenCQUT";
   const query = encodeURIComponent(`org:${org} type:issue state:open`);
-  const response = await fetch(
+  const response = await githubFetch(
+    config,
     `https://api.github.com/search/issues?q=${query}&sort=updated&order=desc&per_page=50`,
     {
       headers: githubHeaders(config.github.token),

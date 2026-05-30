@@ -5,6 +5,7 @@ import {
   saveGitHubProfileCache,
   type GitHubStats,
 } from "@/lib/github-profile-cache-store";
+import { githubFetch } from "@/lib/github-fetch";
 import { loadServerConfig } from "@/lib/server-config";
 import { getSessionFromRequest, getSessionSecret } from "@/lib/session";
 
@@ -81,13 +82,13 @@ async function addIssueSearchResults(
   return data.total_count ?? 0;
 }
 
-async function fetchGitHubStats(username: string): Promise<GitHubStats> {
+async function fetchGitHubStats(config: ReturnType<typeof loadServerConfig>, username: string): Promise<GitHubStats> {
   const searchHeaders = { Accept: "application/vnd.github+json" };
   const [contribRes, prSearchRes, issueSearchRes, commitSearchRes] = await Promise.all([
-    fetch(`https://github-contributions-api.jogruber.de/v4/${username}?y=last`),
-    fetch(`https://api.github.com/search/issues?q=author:${username}+type:pr&per_page=100`, { headers: searchHeaders }),
-    fetch(`https://api.github.com/search/issues?q=author:${username}+type:issue&per_page=100`, { headers: searchHeaders }),
-    fetch(`https://api.github.com/search/commits?q=author:${username}&per_page=100`, { headers: searchHeaders }),
+    githubFetch(config, `https://github-contributions-api.jogruber.de/v4/${username}?y=last`),
+    githubFetch(config, `https://api.github.com/search/issues?q=author:${username}+type:pr&per_page=100`, { headers: searchHeaders }),
+    githubFetch(config, `https://api.github.com/search/issues?q=author:${username}+type:issue&per_page=100`, { headers: searchHeaders }),
+    githubFetch(config, `https://api.github.com/search/commits?q=author:${username}&per_page=100`, { headers: searchHeaders }),
   ]);
 
   const contribData = await readJson<{
@@ -137,7 +138,7 @@ async function fetchGitHubStats(username: string): Promise<GitHubStats> {
   const reposNeedingStars = [...repoContributions.values()].filter((repo) => repo.stars === 0);
   const repoDetailResults = await Promise.all(
     reposNeedingStars.slice(0, 80).map(async (repo) => {
-      const response = await fetch(`https://api.github.com/repos/${repo.repo}`, { headers: searchHeaders });
+      const response = await githubFetch(config, `https://api.github.com/repos/${repo.repo}`, { headers: searchHeaders });
       return readJson<GitHubRepo | null>(response, null);
     }),
   );
@@ -192,7 +193,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const stats = await fetchGitHubStats(username);
+    const stats = await fetchGitHubStats(config, username);
     const record = saveGitHubProfileCache(username, stats);
     return NextResponse.json({ ...record, cached: false });
   } catch {

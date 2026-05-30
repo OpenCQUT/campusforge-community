@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { loadServerConfig } from "@/lib/server-config";
 import { deleteIssueClaim, findIssueClaim, saveIssueClaim } from "@/lib/issue-claim-store";
+import { githubFetch } from "@/lib/github-fetch";
 import { getSessionFromRequest, getSessionSecret, type SignedSession } from "@/lib/session";
 
 interface ClaimBody {
@@ -90,7 +91,8 @@ export async function POST(request: Request) {
     }, { status: 202 });
   }
 
-  const response = await fetch(
+  const response = await githubFetch(
+    config,
     `https://api.github.com/repos/${owner}/${repo}/issues/${issueNumber}/assignees`,
     {
       method: "POST",

@@ -13,6 +13,7 @@ export interface ServerConfig {
     token: string;
     clientId: string;
     clientSecret: string;
+    proxy: string;
   };
   app: {
     debug: boolean;
@@ -51,6 +52,7 @@ const DEFAULT_CONFIG: ServerConfig = {
     token: "",
     clientId: "",
     clientSecret: "",
+    proxy: "",
   },
   app: {
     debug: false,
@@ -207,6 +209,7 @@ export function loadServerConfig(): ServerConfig {
           token: asString(parsed.github?.token).trim(),
           clientId: asString(parsed.github?.client_id).trim(),
           clientSecret: asString(parsed.github?.client_secret).trim(),
+          proxy: asString(parsed.github?.proxy).trim(),
         },
         app: {
           debug: asBoolean(parsed.app?.debug),

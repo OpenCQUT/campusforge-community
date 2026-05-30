@@ -52,6 +52,12 @@
 `[verification]`。本地开发可使用 `mode = "log"`，生产环境应使用 `mode = "smtp"` 并通过
 服务器配置文件或 secret manager 注入 SMTP 凭证。
 
+## GitHub API：undici fetch + 可选代理
+
+GitHub OAuth、issues、认领和个人贡献信息通过服务端 fetch 请求 GitHub API。生产环境可在
+`config.toml` 的 `[github].proxy` 配置 HTTP(S) 代理，运行时由 `undici` 的 `ProxyAgent`
+显式接管 GitHub 请求，避免依赖 Node.js 对环境变量代理的隐式支持。
+
 ## Monorepo：pnpm workspace + Turborepo
 
 Monorepo 结构便于共享：

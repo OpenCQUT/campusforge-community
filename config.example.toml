@@ -9,6 +9,9 @@ org = "OpenCQUT"
 token = ""
 client_id = ""
 client_secret = ""
+# Optional HTTP(S) proxy for server-side GitHub API/OAuth requests.
+# Example: "http://user:password@proxy.example.com:18080"
+proxy = ""
 
 [app]
 debug = true

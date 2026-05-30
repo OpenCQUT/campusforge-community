@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { saveGitHubConnection } from "@/lib/github-connection-store";
+import { githubFetch } from "@/lib/github-fetch";
 import { getPublicUrl } from "@/lib/public-url";
 import { loadServerConfig } from "@/lib/server-config";
 import { getSessionFromRequest, getSessionSecret } from "@/lib/session";
@@ -47,7 +48,7 @@ export async function GET(request: Request) {
     return redirectToProfile(request, "oauth-not-configured");
   }
 
-  const tokenResponse = await fetch("https://github.com/login/oauth/access_token", {
+  const tokenResponse = await githubFetch(config, "https://github.com/login/oauth/access_token", {
     method: "POST",
     headers: {
       Accept: "application/json",
@@ -66,7 +67,7 @@ export async function GET(request: Request) {
     return redirectToProfile(request, "token-failed");
   }
 
-  const userResponse = await fetch("https://api.github.com/user", {
+  const userResponse = await githubFetch(config, "https://api.github.com/user", {
     headers: {
       Accept: "application/vnd.github+json",
       Authorization: `Bearer ${tokenData.access_token}`,

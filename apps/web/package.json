@@ -16,7 +16,8 @@
     "next-intl": "^4.13.0",
     "nodemailer": "^8.0.10",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "undici": "^6.26.0"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^16.2.6",
