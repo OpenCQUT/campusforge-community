@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
+import { getPublicUrl } from "@/lib/public-url";
 import { loadServerConfig } from "@/lib/server-config";
 import { getSessionFromRequest, getSessionSecret } from "@/lib/session";
 
@@ -18,7 +19,7 @@ export async function GET(request: Request) {
   }
 
   const state = randomBytes(24).toString("hex");
-  const callbackUrl = new URL("/api/github/oauth/callback", request.url).toString();
+  const callbackUrl = getPublicUrl(request, "/api/github/oauth/callback");
   const authorizeUrl = new URL("https://github.com/login/oauth/authorize");
   authorizeUrl.searchParams.set("client_id", config.github.clientId);
   authorizeUrl.searchParams.set("redirect_uri", callbackUrl);

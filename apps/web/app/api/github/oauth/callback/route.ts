@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { saveGitHubConnection } from "@/lib/github-connection-store";
+import { getPublicUrl } from "@/lib/public-url";
 import { loadServerConfig } from "@/lib/server-config";
 import { getSessionFromRequest, getSessionSecret } from "@/lib/session";
 
@@ -56,7 +57,7 @@ export async function GET(request: Request) {
       client_id: config.github.clientId,
       client_secret: config.github.clientSecret,
       code,
-      redirect_uri: new URL("/api/github/oauth/callback", request.url).toString(),
+      redirect_uri: getPublicUrl(request, "/api/github/oauth/callback"),
       state,
     }),
   });
