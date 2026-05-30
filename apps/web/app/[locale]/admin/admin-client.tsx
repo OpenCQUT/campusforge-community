@@ -48,6 +48,8 @@ interface ServerConfigForm {
     clientId: string;
     clientSecret: string;
     clientSecretConfigured: boolean;
+    proxy: string;
+    proxyConfigured: boolean;
   };
   app: {
     debug: boolean;
@@ -86,6 +88,8 @@ const defaultServerConfig: ServerConfigForm = {
     clientId: "",
     clientSecret: "",
     clientSecretConfigured: false,
+    proxy: "",
+    proxyConfigured: false,
   },
   app: {
     debug: false,
@@ -206,6 +210,7 @@ export default function AdminPage() {
             ...nextConfig.github,
             token: "",
             clientSecret: "",
+            proxy: "",
           },
           email: {
             ...nextConfig.email,
@@ -291,6 +296,7 @@ export default function AdminPage() {
         ...nextConfig.github,
         token: "",
         clientSecret: "",
+        proxy: "",
       },
       email: {
         ...nextConfig.email,
@@ -603,6 +609,17 @@ export default function AdminPage() {
                         value={serverConfig.github.clientSecret}
                         onChange={(event) => updateGitHubConfig("clientSecret", event.target.value)}
                         placeholder={serverConfig.github.clientSecretConfigured ? t("secretConfigured") : ""}
+                        disabled={configStatus === "loading"}
+                      />
+                    </div>
+                    <div className="field">
+                      <label htmlFor="github-proxy">{t("githubProxy")}</label>
+                      <input
+                        id="github-proxy"
+                        type="password"
+                        value={serverConfig.github.proxy}
+                        onChange={(event) => updateGitHubConfig("proxy", event.target.value)}
+                        placeholder={serverConfig.github.proxyConfigured ? t("secretConfigured") : t("notConfigured")}
                         disabled={configStatus === "loading"}
                       />
                     </div>

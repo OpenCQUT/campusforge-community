@@ -246,6 +246,7 @@
     "githubToken": "GitHub Token",
     "githubClientId": "OAuth Client ID",
     "githubClientSecret": "OAuth Client Secret",
+    "githubProxy": "GitHub Proxy",
     "emailSettingsTitle": "SMTP Email",
     "emailSettingsSubtitle": "Used for application verification codes and system notices.",
     "verificationSettingsTitle": "Verification Rules",

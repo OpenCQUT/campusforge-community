@@ -246,6 +246,7 @@
     "githubToken": "GitHub Token",
     "githubClientId": "OAuth Client ID",
     "githubClientSecret": "OAuth Client Secret",
+    "githubProxy": "GitHub 代理",
     "emailSettingsTitle": "SMTP 邮件配置",
     "emailSettingsSubtitle": "用于申请邮箱验证码等系统通知。",
     "verificationSettingsTitle": "验证码策略",
