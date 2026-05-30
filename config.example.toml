@@ -34,3 +34,7 @@ pass = ""
 [verification]
 code_ttl_minutes = 10
 resend_cooldown_seconds = 60
+
+[logging]
+# debug, info, warn, or error. info records normal operation and errors.
+level = "info"

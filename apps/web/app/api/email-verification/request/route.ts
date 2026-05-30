@@ -5,6 +5,7 @@ import {
   generateEmailCode,
 } from "@/lib/email-verification-store";
 import { sendEmailVerificationCode } from "@/lib/mailer";
+import { logError, logInfo } from "@/lib/app-logger";
 import { loadServerConfig } from "@/lib/server-config";
 
 export const runtime = "nodejs";
@@ -30,6 +31,7 @@ export async function POST(request: Request) {
   }
 
   if (config.email.mode === "smtp" && (!config.email.host || !config.email.from)) {
+    logError(config, "email.verification", "SMTP email is not configured");
     return NextResponse.json({ error: "SMTP email is not configured." }, { status: 503 });
   }
 
@@ -44,7 +46,15 @@ export async function POST(request: Request) {
 
   try {
     await sendEmailVerificationCode(config, { email, code });
+    logInfo(config, "email.verification", "verification email sent", {
+      email,
+      mode: config.email.mode,
+    });
   } catch {
+    logError(config, "email.verification", "unable to send verification email", {
+      email,
+      mode: config.email.mode,
+    });
     return NextResponse.json({ error: "Unable to send verification email." }, { status: 502 });
   }
 

@@ -12,6 +12,7 @@ type Role = "STUDENT" | "MEMBER" | "MAINTAINER" | "ADMIN";
 type CourseStatus = "DRAFT" | "ACTIVE" | "ARCHIVED";
 type Section = "applications" | "members" | "invitations" | "courses" | "resources" | "settings" | "audit";
 type ConfigStatus = "idle" | "loading" | "saving" | "saved" | "error";
+type LogLevel = "debug" | "info" | "warn" | "error";
 
 interface Application {
   id: string; name: string; email: string; studentId: string;
@@ -34,6 +35,13 @@ interface ResourceItem {
 }
 interface AuditEntry {
   id: string; actor: string; action: string; target: string; time: string;
+}
+interface SystemLogRecord {
+  time: string;
+  level: LogLevel;
+  scope: string;
+  message: string;
+  details?: Record<string, string | number | boolean | null>;
 }
 interface ServerConfigForm {
   admin: {
@@ -72,6 +80,9 @@ interface ServerConfigForm {
   verification: {
     codeTtlMinutes: number;
     resendCooldownSeconds: number;
+  };
+  logging: {
+    level: LogLevel;
   };
 }
 
@@ -112,6 +123,9 @@ const defaultServerConfig: ServerConfigForm = {
   verification: {
     codeTtlMinutes: 10,
     resendCooldownSeconds: 60,
+  },
+  logging: {
+    level: "info",
   },
 };
 
@@ -188,6 +202,8 @@ export default function AdminPage() {
   const [courses, setCourses] = useState(() => coursesData());
   const [resources, setResources] = useState(() => resourcesData());
   const [auditLog, setAuditLog] = useState(() => auditData());
+  const [systemErrors, setSystemErrors] = useState<SystemLogRecord[]>([]);
+  const [systemErrorsLoading, setSystemErrorsLoading] = useState(false);
 
   // Applications state
   const [appFilter, setAppFilter] = useState<string>("ALL");
@@ -225,6 +241,26 @@ export default function AdminPage() {
 
     loadServerConfig();
   }, []);
+
+  const loadSystemErrors = useCallback(async () => {
+    setSystemErrorsLoading(true);
+    try {
+      const response = await fetch("/api/admin/logs");
+      if (!response.ok) throw new Error("failed");
+      const data = await response.json() as { errors: SystemLogRecord[] };
+      setSystemErrors(data.errors);
+    } catch {
+      setSystemErrors([]);
+    } finally {
+      setSystemErrorsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (section === "audit") {
+      loadSystemErrors();
+    }
+  }, [section, loadSystemErrors]);
 
   function addAuditEntry(action: string, target: string) {
     const now = new Date();
@@ -355,6 +391,16 @@ export default function AdminPage() {
       ...current,
       verification: {
         ...current.verification,
+        [field]: value,
+      },
+    }));
+  }
+
+  function updateLoggingConfig(field: keyof ServerConfigForm["logging"], value: LogLevel) {
+    setServerConfig((current) => ({
+      ...current,
+      logging: {
+        ...current.logging,
         [field]: value,
       },
     }));
@@ -743,6 +789,23 @@ export default function AdminPage() {
                     <ReadOnlyField label={t("sessionSecret")} value={serverConfig.app.sessionSecretConfigured ? t("configured") : t("notConfigured")} />
                   </ConfigSection>
 
+                  <ConfigSection title={t("loggingSettingsTitle")} subtitle={t("loggingSettingsSubtitle")}>
+                    <div className="field">
+                      <label htmlFor="log-level">{t("logLevel")}</label>
+                      <select
+                        id="log-level"
+                        value={serverConfig.logging.level}
+                        onChange={(event) => updateLoggingConfig("level", event.target.value as LogLevel)}
+                        disabled={configStatus === "loading"}
+                      >
+                        <option value="debug">debug</option>
+                        <option value="info">info</option>
+                        <option value="warn">warn</option>
+                        <option value="error">error</option>
+                      </select>
+                    </div>
+                  </ConfigSection>
+
                   <ConfigSection title={t("storageSettingsTitle")} subtitle={t("storageSettingsSubtitle")}>
                     <div className="admin-readonly-grid">
                       <ReadOnlyField label={t("dataDir")} value={serverConfig.storage.dataDir || "-"} />
@@ -774,6 +837,30 @@ export default function AdminPage() {
           {section === "audit" && (
             <>
               <SectionHeader title={t("auditTitle")} subtitle={t("auditSubtitle")} />
+              <div className="glass-card admin-settings-card" style={{ marginBottom: 20 }}>
+                <SectionHeader title={t("systemErrorsTitle")} subtitle={t("systemErrorsSubtitle")}>
+                  <button className="btn btn-ghost btn-sm" type="button" onClick={loadSystemErrors} disabled={systemErrorsLoading}>
+                    {systemErrorsLoading ? t("loading") : t("refreshLogs")}
+                  </button>
+                </SectionHeader>
+                {systemErrors.length === 0 ? <Empty msg={t("noSystemErrors")} /> : (
+                  <div className="table-wrap"><table className="table"><thead><tr>
+                    <th>{t("colTime")}</th><th>{t("colLevel")}</th><th>{t("colScope")}</th><th>{t("colMessage")}</th><th>{t("colTarget")}</th>
+                  </tr></thead><tbody>
+                    {systemErrors.map((entry) => (
+                      <tr key={`${entry.time}-${entry.scope}-${entry.message}`}>
+                        <td style={{ fontFamily: "monospace", fontSize: "0.82rem" }}>{entry.time}</td>
+                        <td><span className="tag tag-danger">{entry.level}</span></td>
+                        <td style={{ fontWeight: 600 }}>{entry.scope}</td>
+                        <td>{entry.message}</td>
+                        <td style={{ fontFamily: "monospace", fontSize: "0.78rem" }}>
+                          {entry.details ? JSON.stringify(entry.details) : "-"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody></table></div>
+                )}
+              </div>
               {auditLog.length === 0 ? <Empty msg={t("noAudit")} /> : (
                 <div className="table-wrap"><table className="table"><thead><tr>
                   <th>{t("colTime")}</th><th>{t("colActor")}</th><th>{t("colAction")}</th><th>{t("colTarget")}</th>

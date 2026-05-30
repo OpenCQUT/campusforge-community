@@ -38,7 +38,7 @@ scripts/deploy.sh \
 - 将证书解压到 `/etc/nginx/ssl/<domain>`。
 - 按服务器现有 `sites-available` / `sites-enabled` 风格生成 Nginx HTTPS 反代配置。
 - 初始化 `/opt/campusforge/.env` 与 `/opt/campusforge/config.toml`，后续部署不会覆盖这两个文件。
-- 默认将运行时数据写入 `/opt/campusforge/data`，应用日志目录预留为 `/opt/campusforge/logs`。
+- 默认将运行时数据写入 `/opt/campusforge/data`，应用日志写入 `/opt/campusforge/logs`。
 
 首次部署后请登录服务器修改 `/opt/campusforge/config.toml` 中的管理员邮箱、管理员密码和
 GitHub OAuth 配置，然后重新执行部署命令或运行：
@@ -79,6 +79,10 @@ pass = "smtp-password"
 管理员也可以登录网页后在个人中心的服务器配置区域修改 SMTP 和验证码参数。网页保存的配置
 写入 `data_dir/runtime-config.json`，SMTP 密码不会在接口响应中回显；密码字段留空表示保留
 当前值。
+
+日志等级依赖 `config.toml` 或运行时配置的 `[logging].level`，默认 `info`。Web 服务会写入
+`log_dir/app.log`，错误会额外写入 `log_dir/error.log`，管理员后台的审计页会展示最近的
+错误日志。
 
 SMTP 的 `from` 必须符合邮件服务商策略。多数个人邮箱不能稳定伪造公司域名发件人，否则会被
 SPF/DKIM/DMARC 拦截或进入垃圾箱。没有公司邮箱时，建议使用个人邮箱地址或服务商允许的发件

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { saveGitHubConnection } from "@/lib/github-connection-store";
 import { githubFetch } from "@/lib/github-fetch";
+import { logError } from "@/lib/app-logger";
 import { getPublicUrl } from "@/lib/public-url";
 import { loadServerConfig } from "@/lib/server-config";
 import { getSessionFromRequest, getSessionSecret } from "@/lib/session";
@@ -64,6 +65,10 @@ export async function GET(request: Request) {
   });
   const tokenData = await tokenResponse.json() as GitHubTokenResponse;
   if (!tokenResponse.ok || !tokenData.access_token || tokenData.error) {
+    logError(config, "github.oauth", "failed to exchange GitHub OAuth token", {
+      status: tokenResponse.status,
+      hasError: Boolean(tokenData.error),
+    });
     return redirectToProfile(request, "token-failed");
   }
 
@@ -76,6 +81,9 @@ export async function GET(request: Request) {
   });
   const userData = await userResponse.json() as GitHubUserResponse;
   if (!userResponse.ok || !userData.id || !userData.login) {
+    logError(config, "github.oauth", "failed to fetch GitHub OAuth user", {
+      status: userResponse.status,
+    });
     return redirectToProfile(request, "user-failed");
   }
 

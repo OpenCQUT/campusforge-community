@@ -5,6 +5,7 @@ import {
   writeRuntimeConfig,
   type RuntimeConfig,
 } from "@/lib/runtime-config";
+import { logInfo } from "@/lib/app-logger";
 import { loadServerConfig, type ServerConfig } from "@/lib/server-config";
 import { getSessionFromRequest, getSessionSecret } from "@/lib/session";
 
@@ -37,6 +38,9 @@ interface ConfigBody {
   verification?: {
     codeTtlMinutes?: unknown;
     resendCooldownSeconds?: unknown;
+  };
+  logging?: {
+    level?: unknown;
   };
 }
 
@@ -87,6 +91,7 @@ function publicConfig(config: ServerConfig) {
       passConfigured: Boolean(config.email.pass),
     },
     verification: config.verification,
+    logging: config.logging,
   };
 }
 
@@ -133,6 +138,7 @@ export async function PUT(request: Request) {
   const app = body.app ?? {};
   const email = body.email ?? {};
   const verification = body.verification ?? {};
+  const logging = body.logging ?? {};
   const adminEmail = stringFrom(admin.email).toLowerCase();
   const adminEmails = Array.from(
     new Set([
@@ -194,8 +200,21 @@ export async function PUT(request: Request) {
         ),
       ),
     },
+    logging: {
+      level:
+        logging.level === "debug" ||
+        logging.level === "warn" ||
+        logging.level === "error"
+          ? logging.level
+          : "info",
+    },
   };
 
   writeRuntimeConfig(config.storage.dataDir, nextRuntime);
+  logInfo(config, "admin.config", "runtime configuration saved", {
+    adminEmails: adminEmails.length,
+    emailMode: nextRuntime.email?.mode ?? null,
+    logLevel: nextRuntime.logging?.level ?? null,
+  });
   return NextResponse.json(publicConfig(loadServerConfig()));
 }

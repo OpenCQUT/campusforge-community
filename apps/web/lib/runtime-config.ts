@@ -8,6 +8,7 @@ export interface RuntimeConfig {
   app?: Partial<Pick<ServerConfig["app"], "debug">>;
   email?: Partial<ServerConfig["email"]>;
   verification?: Partial<ServerConfig["verification"]>;
+  logging?: Partial<ServerConfig["logging"]>;
 }
 
 function runtimeConfigPath(dataDir: string): string {
@@ -53,6 +54,10 @@ export function mergeRuntimeConfig(config: ServerConfig): ServerConfig {
     verification: {
       ...config.verification,
       ...runtime.verification,
+    },
+    logging: {
+      ...config.logging,
+      ...runtime.logging,
     },
   };
 }

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { loadServerConfig } from "@/lib/server-config";
 import { getIssueClaims } from "@/lib/issue-claim-store";
 import { githubFetch } from "@/lib/github-fetch";
+import { logError } from "@/lib/app-logger";
 import { getSessionFromRequest, getSessionSecret } from "@/lib/session";
 
 interface GitHubSearchIssue {
@@ -53,6 +54,10 @@ export async function GET(request: Request) {
   );
 
   if (!response.ok) {
+    logError(config, "github.issues", "failed to fetch GitHub issues", {
+      org,
+      status: response.status,
+    });
     return NextResponse.json(
       { error: "github_fetch_failed", status: response.status },
       { status: 502 },

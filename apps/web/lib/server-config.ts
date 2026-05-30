@@ -36,6 +36,9 @@ export interface ServerConfig {
     codeTtlMinutes: number;
     resendCooldownSeconds: number;
   };
+  logging: {
+    level: "debug" | "info" | "warn" | "error";
+  };
 }
 
 type TomlValue = string | boolean | number | string[];
@@ -74,6 +77,9 @@ const DEFAULT_CONFIG: ServerConfig = {
   verification: {
     codeTtlMinutes: 10,
     resendCooldownSeconds: 60,
+  },
+  logging: {
+    level: "info",
   },
 };
 
@@ -179,6 +185,11 @@ function asStringList(value: TomlValue | undefined): string[] {
   return single ? [single] : [];
 }
 
+function asLogLevel(value: TomlValue | undefined): ServerConfig["logging"]["level"] {
+  const level = asString(value).trim().toLowerCase();
+  return level === "debug" || level === "warn" || level === "error" ? level : "info";
+}
+
 function configCandidates(): string[] {
   if (process.env.CAMPUSFORGE_CONFIG) {
     return [process.env.CAMPUSFORGE_CONFIG];
@@ -239,6 +250,9 @@ export function loadServerConfig(): ServerConfig {
             parsed.verification?.resend_cooldown_seconds,
             DEFAULT_CONFIG.verification.resendCooldownSeconds,
           ),
+        },
+        logging: {
+          level: asLogLevel(parsed.logging?.level),
         },
       });
     } catch {

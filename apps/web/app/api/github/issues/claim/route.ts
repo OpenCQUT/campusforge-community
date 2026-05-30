@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { loadServerConfig } from "@/lib/server-config";
 import { deleteIssueClaim, findIssueClaim, saveIssueClaim } from "@/lib/issue-claim-store";
 import { githubFetch } from "@/lib/github-fetch";
+import { logError } from "@/lib/app-logger";
 import { getSessionFromRequest, getSessionSecret, type SignedSession } from "@/lib/session";
 
 interface ClaimBody {
@@ -102,6 +103,12 @@ export async function POST(request: Request) {
   );
 
   if (!response.ok) {
+    logError(config, "github.claim", "failed to assign GitHub issue", {
+      owner,
+      repo,
+      number: issueNumber,
+      status: response.status,
+    });
     const claim = saveIssueClaim({
       id: `${owner}/${repo}#${issueNumber}`,
       owner,

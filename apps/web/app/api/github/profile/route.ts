@@ -6,6 +6,7 @@ import {
   type GitHubStats,
 } from "@/lib/github-profile-cache-store";
 import { githubFetch } from "@/lib/github-fetch";
+import { logError } from "@/lib/app-logger";
 import { loadServerConfig } from "@/lib/server-config";
 import { getSessionFromRequest, getSessionSecret } from "@/lib/session";
 
@@ -197,6 +198,9 @@ export async function GET(request: Request) {
     const record = saveGitHubProfileCache(username, stats);
     return NextResponse.json({ ...record, cached: false });
   } catch {
+    logError(config, "github.profile", "failed to fetch GitHub profile", {
+      username,
+    });
     if (cached) {
       return NextResponse.json({ ...cached, cached: true, stale: true });
     }
