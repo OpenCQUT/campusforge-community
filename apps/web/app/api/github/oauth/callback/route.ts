@@ -18,13 +18,17 @@ interface GitHubUserResponse {
   html_url?: string;
 }
 
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
 function getCookie(request: Request, name: string): string {
   const match = (request.headers.get("cookie") ?? "").match(new RegExp(`(?:^|;\\s*)${name}=([^;]+)`));
   return match?.[1] ? decodeURIComponent(match[1]) : "";
 }
 
 function redirectToProfile(request: Request, status: string): NextResponse {
-  return NextResponse.redirect(new URL(`/zh/profile?github=${status}`, request.url));
+  return NextResponse.redirect(getPublicUrl(request, `/zh/profile?github=${status}`));
 }
 
 export async function GET(request: Request) {
@@ -49,52 +53,75 @@ export async function GET(request: Request) {
     return redirectToProfile(request, "oauth-not-configured");
   }
 
-  const tokenResponse = await githubFetch(config, "https://github.com/login/oauth/access_token", {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      client_id: config.github.clientId,
-      client_secret: config.github.clientSecret,
-      code,
-      redirect_uri: getPublicUrl(request, "/api/github/oauth/callback"),
-      state,
-    }),
-  });
-  const tokenData = await tokenResponse.json() as GitHubTokenResponse;
-  if (!tokenResponse.ok || !tokenData.access_token || tokenData.error) {
+  let tokenData: GitHubTokenResponse;
+  try {
+    const tokenResponse = await githubFetch(config, "https://github.com/login/oauth/access_token", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        client_id: config.github.clientId,
+        client_secret: config.github.clientSecret,
+        code,
+        redirect_uri: getPublicUrl(request, "/api/github/oauth/callback"),
+        state,
+      }),
+    });
+    tokenData = await tokenResponse.json() as GitHubTokenResponse;
+    if (!tokenResponse.ok || !tokenData.access_token || tokenData.error) {
+      logError(config, "github.oauth", "failed to exchange GitHub OAuth token", {
+        status: tokenResponse.status,
+        hasError: Boolean(tokenData.error),
+      });
+      return redirectToProfile(request, "token-failed");
+    }
+  } catch (error) {
     logError(config, "github.oauth", "failed to exchange GitHub OAuth token", {
-      status: tokenResponse.status,
-      hasError: Boolean(tokenData.error),
+      error: errorMessage(error),
     });
     return redirectToProfile(request, "token-failed");
   }
 
-  const userResponse = await githubFetch(config, "https://api.github.com/user", {
-    headers: {
-      Accept: "application/vnd.github+json",
-      Authorization: `Bearer ${tokenData.access_token}`,
-      "X-GitHub-Api-Version": "2022-11-28",
-    },
-  });
-  const userData = await userResponse.json() as GitHubUserResponse;
-  if (!userResponse.ok || !userData.id || !userData.login) {
+  let userData: GitHubUserResponse;
+  try {
+    const userResponse = await githubFetch(config, "https://api.github.com/user", {
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: `Bearer ${tokenData.access_token}`,
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+    });
+    userData = await userResponse.json() as GitHubUserResponse;
+    if (!userResponse.ok || !userData.id || !userData.login) {
+      logError(config, "github.oauth", "failed to fetch GitHub OAuth user", {
+        status: userResponse.status,
+      });
+      return redirectToProfile(request, "user-failed");
+    }
+  } catch (error) {
     logError(config, "github.oauth", "failed to fetch GitHub OAuth user", {
-      status: userResponse.status,
+      error: errorMessage(error),
     });
     return redirectToProfile(request, "user-failed");
   }
 
-  saveGitHubConnection({
-    email: session.email,
-    githubId: userData.id,
-    username: userData.login,
-    avatarUrl: userData.avatar_url ?? "",
-    profileUrl: userData.html_url ?? `https://github.com/${userData.login}`,
-    connectedAt: new Date().toISOString(),
-  });
+  try {
+    saveGitHubConnection({
+      email: session.email,
+      githubId: userData.id,
+      username: userData.login,
+      avatarUrl: userData.avatar_url ?? "",
+      profileUrl: userData.html_url ?? `https://github.com/${userData.login}`,
+      connectedAt: new Date().toISOString(),
+    });
+  } catch (error) {
+    logError(config, "github.oauth", "failed to save GitHub OAuth connection", {
+      error: errorMessage(error),
+    });
+    return redirectToProfile(request, "save-failed");
+  }
 
   const response = redirectToProfile(request, "connected");
   response.cookies.set("cf_github_oauth_state", "", {

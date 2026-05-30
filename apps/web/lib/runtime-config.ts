@@ -15,6 +15,10 @@ function runtimeConfigPath(dataDir: string): string {
   return join(dataDir, "runtime-config.json");
 }
 
+function secretString(value: string | undefined, fallback: string): string {
+  return value && value !== "<configured>" ? value : fallback;
+}
+
 export function readRuntimeConfig(dataDir: string): RuntimeConfig {
   try {
     return JSON.parse(readFileSync(runtimeConfigPath(dataDir), "utf8")) as RuntimeConfig;
@@ -49,6 +53,9 @@ export function mergeRuntimeConfig(config: ServerConfig): ServerConfig {
     github: {
       ...config.github,
       ...runtime.github,
+      token: secretString(runtime.github?.token, config.github.token),
+      clientSecret: secretString(runtime.github?.clientSecret, config.github.clientSecret),
+      proxy: secretString(runtime.github?.proxy, config.github.proxy),
     },
     app: {
       ...config.app,

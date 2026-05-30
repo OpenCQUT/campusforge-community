@@ -15,7 +15,7 @@ export async function GET(request: Request) {
   }
 
   if (!config.github.clientId || !config.github.clientSecret) {
-    return NextResponse.redirect(new URL("/zh/profile?github=oauth-not-configured", request.url));
+    return NextResponse.redirect(getPublicUrl(request, "/zh/profile?github=oauth-not-configured"));
   }
 
   const state = randomBytes(24).toString("hex");

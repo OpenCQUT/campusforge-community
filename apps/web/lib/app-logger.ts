@@ -89,21 +89,25 @@ export function writeLog(
   message: string,
   details?: LogRecord["details"],
 ) {
-  if (!shouldLog(config, level)) return;
+  try {
+    if (!shouldLog(config, level)) return;
 
-  const record: LogRecord = {
-    time: new Date().toISOString(),
-    level,
-    scope,
-    message,
-    ...(details ? { details } : {}),
-  };
-  mkdirSync(config.storage.logDir, { recursive: true });
-  maintainAppLog(config);
-  const line = `${JSON.stringify(record)}\n`;
-  appendFileSync(logPath(config, "app.log"), line, { mode: 0o600 });
-  if (level === "error") {
-    appendFileSync(logPath(config, "error.log"), line, { mode: 0o600 });
+    const record: LogRecord = {
+      time: new Date().toISOString(),
+      level,
+      scope,
+      message,
+      ...(details ? { details } : {}),
+    };
+    mkdirSync(config.storage.logDir, { recursive: true });
+    maintainAppLog(config);
+    const line = `${JSON.stringify(record)}\n`;
+    appendFileSync(logPath(config, "app.log"), line, { mode: 0o600 });
+    if (level === "error") {
+      appendFileSync(logPath(config, "error.log"), line, { mode: 0o600 });
+    }
+  } catch {
+    // Logging must not break request handling.
   }
 }
 

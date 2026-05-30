@@ -76,7 +76,7 @@ function publicConfig(config: ServerConfig) {
       clientId: config.github.clientId,
       clientSecret: "",
       clientSecretConfigured: Boolean(config.github.clientSecret),
-      proxy: config.github.proxy ? "<configured>" : "",
+      proxy: "",
       proxyConfigured: Boolean(config.github.proxy),
     },
     app: {
@@ -106,6 +106,15 @@ function numberFrom(value: unknown, fallback: number): number {
 
 function stringFrom(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
+}
+
+function editableSecretFrom(value: unknown): string {
+  const secret = stringFrom(value);
+  return secret === "<configured>" ? "" : secret;
+}
+
+function preservedSecretFrom(value: string | undefined, fallback: string): string {
+  return value && value !== "<configured>" ? value : fallback;
 }
 
 function stringListFrom(value: unknown, fallback: string[]): string[] {
@@ -147,6 +156,7 @@ export async function PUT(request: Request) {
   const email = body.email ?? {};
   const verification = body.verification ?? {};
   const logging = body.logging ?? {};
+  const githubProxy = editableSecretFrom(github.proxy);
   const adminEmail = stringFrom(admin.email).toLowerCase();
   const adminEmails = Array.from(
     new Set([
@@ -167,16 +177,16 @@ export async function PUT(request: Request) {
       token:
         typeof github.token === "string" && github.token.length > 0
           ? github.token
-          : (existingRuntime.github?.token ?? config.github.token),
+          : preservedSecretFrom(existingRuntime.github?.token, config.github.token),
       clientId: stringFrom(github.clientId),
       clientSecret:
         typeof github.clientSecret === "string" && github.clientSecret.length > 0
           ? github.clientSecret
-          : (existingRuntime.github?.clientSecret ?? config.github.clientSecret),
+          : preservedSecretFrom(existingRuntime.github?.clientSecret, config.github.clientSecret),
       proxy:
-        typeof github.proxy === "string" && github.proxy.length > 0
-          ? github.proxy.trim()
-          : (existingRuntime.github?.proxy ?? config.github.proxy),
+        githubProxy
+          ? githubProxy
+          : preservedSecretFrom(existingRuntime.github?.proxy, config.github.proxy),
     },
     app: {
       ...existingRuntime.app,

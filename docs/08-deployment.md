@@ -48,6 +48,12 @@ cd /opt/campusforge/app
 docker compose --env-file /opt/campusforge/.env -f docker-compose.prod.yml up -d --build
 ```
 
+GitHub OAuth App 的 Authorization callback URL 必须填写生产域名回调地址，例如：
+
+```text
+https://campusforge.cn/api/github/oauth/callback
+```
+
 管理员账号支持列表配置。生产环境可以将 `password` 留空，首次登录相关代码路径加载时会在
 `data_dir/admin-password.txt` 生成一个强随机密码：
 

@@ -28,6 +28,25 @@ function getSessionRole(): string | null {
   return match?.[1] ?? null;
 }
 
+function getGitHubOAuthMessage(status: string | null, t: ReturnType<typeof useTranslations<"profile">>): string {
+  switch (status) {
+    case "oauth-not-configured":
+      return t("githubOauthNotConfigured");
+    case "state-invalid":
+      return t("githubOauthStateInvalid");
+    case "token-failed":
+      return t("githubOauthTokenFailed");
+    case "user-failed":
+      return t("githubOauthUserFailed");
+    case "save-failed":
+      return t("githubOauthSaveFailed");
+    case "unauthorized":
+      return t("githubOauthUnauthorized");
+    default:
+      return "";
+  }
+}
+
 // ─── GitHub types ───────────────────────────────────────────────────────────
 
 // ─── Contribution Graph ────────────────────────────────────────────────────
@@ -190,6 +209,7 @@ export default function ProfilePage() {
   const startedCount = courses.length;
   const completedCount = courses.filter((c) => c.completedAt).length;
   const githubStatus = searchParams.get("github");
+  const githubOAuthMessage = getGitHubOAuthMessage(githubStatus, t);
 
   return (
     <main className="page profile-page">
@@ -244,8 +264,8 @@ export default function ProfilePage() {
             <div className="profile-github-empty">
               <div className="profile-github-empty-mark" aria-hidden="true">GH</div>
               <div>
-                {githubStatus === "oauth-not-configured" && (
-                  <p style={{ color: "var(--danger)", fontSize: "0.88rem", marginBottom: 10 }}>{t("githubOauthNotConfigured")}</p>
+                {githubOAuthMessage && (
+                  <p style={{ color: "var(--danger)", fontSize: "0.88rem", marginBottom: 10 }}>{githubOAuthMessage}</p>
                 )}
                 <h3>{t("githubVerifyTitle")}</h3>
                 <p className="profile-muted">{t("githubConnectHint")}</p>
