@@ -24,6 +24,8 @@ log_dir = ".campusforge-logs"
 [email]
 # Use "smtp" in production. Use "log" only for local development.
 mode = "log"
+# tls forces STARTTLS on port 587; ssl uses implicit SSL on port 465.
+encryption = "tls"
 from = "CampusForge <noreply@example.edu>"
 host = ""
 port = 587

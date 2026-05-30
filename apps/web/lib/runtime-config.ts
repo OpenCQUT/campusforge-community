@@ -33,6 +33,13 @@ export function writeRuntimeConfig(dataDir: string, config: RuntimeConfig) {
 
 export function mergeRuntimeConfig(config: ServerConfig): ServerConfig {
   const runtime = readRuntimeConfig(config.storage.dataDir);
+  const email = {
+    ...config.email,
+    ...runtime.email,
+  };
+  const emailEncryption =
+    email.encryption ?? (email.secure || email.port === 465 ? "ssl" : "tls");
+
   return {
     ...config,
     admin: {
@@ -48,8 +55,10 @@ export function mergeRuntimeConfig(config: ServerConfig): ServerConfig {
       ...runtime.app,
     },
     email: {
-      ...config.email,
-      ...runtime.email,
+      ...email,
+      encryption: emailEncryption,
+      port: emailEncryption === "ssl" ? 465 : 587,
+      secure: emailEncryption === "ssl",
     },
     verification: {
       ...config.verification,

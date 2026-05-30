@@ -69,6 +69,7 @@ interface ServerConfigForm {
   };
   email: {
     mode: string;
+    encryption: "tls" | "ssl";
     from: string;
     host: string;
     port: number;
@@ -114,6 +115,7 @@ const defaultServerConfig: ServerConfigForm = {
   },
   email: {
     mode: "log",
+    encryption: "tls",
     from: "",
     host: "",
     port: 587,
@@ -348,6 +350,19 @@ export default function AdminPage() {
   }
 
   function updateEmailConfig(field: keyof ServerConfigForm["email"], value: string | boolean | number) {
+    if (field === "encryption" && (value === "tls" || value === "ssl")) {
+      setServerConfig((current) => ({
+        ...current,
+        email: {
+          ...current.email,
+          encryption: value,
+          port: value === "ssl" ? 465 : 587,
+          secure: value === "ssl",
+        },
+      }));
+      return;
+    }
+
     setServerConfig((current) => ({
       ...current,
       email: {
@@ -713,16 +728,19 @@ export default function AdminPage() {
                       />
                     </div>
                     <div className="field">
-                      <label htmlFor="email-port">{t("emailPort")}</label>
-                      <input
-                        id="email-port"
-                        type="number"
-                        value={serverConfig.email.port}
-                        onChange={(event) => updateEmailConfig("port", Number(event.target.value))}
+                      <label htmlFor="email-encryption">{t("emailEncryption")}</label>
+                      <select
+                        id="email-encryption"
+                        value={serverConfig.email.encryption}
+                        onChange={(event) => updateEmailConfig("encryption", event.target.value)}
                         disabled={configStatus === "loading"}
-                      />
+                      >
+                        <option value="tls">{t("emailEncryptionTls")}</option>
+                        <option value="ssl">{t("emailEncryptionSsl")}</option>
+                      </select>
                     </div>
                   </div>
+                  <ReadOnlyField label={t("emailPort")} value={String(serverConfig.email.port)} />
                   <div className="field">
                     <label htmlFor="email-user">{t("emailUser")}</label>
                     <input
@@ -743,16 +761,6 @@ export default function AdminPage() {
                       disabled={configStatus === "loading"}
                     />
                   </div>
-                  <label className="admin-checkbox" htmlFor="email-secure">
-                    <input
-                      id="email-secure"
-                      type="checkbox"
-                      checked={serverConfig.email.secure}
-                      onChange={(event) => updateEmailConfig("secure", event.target.checked)}
-                      disabled={configStatus === "loading"}
-                    />
-                    <span>{t("emailSecure")}</span>
-                  </label>
                 </ConfigSection>
 
                   <ConfigSection title={t("verificationSettingsTitle")} subtitle={t("verificationSettingsSubtitle")}>

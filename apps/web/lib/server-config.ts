@@ -25,6 +25,7 @@ export interface ServerConfig {
   };
   email: {
     mode: "smtp" | "log";
+    encryption: "tls" | "ssl";
     from: string;
     host: string;
     port: number;
@@ -69,6 +70,7 @@ const DEFAULT_CONFIG: ServerConfig = {
   },
   email: {
     mode: "log",
+    encryption: "tls",
     from: "",
     host: "",
     port: 587,
@@ -194,6 +196,15 @@ function asLogLevel(value: TomlValue | undefined): ServerConfig["logging"]["leve
   return level === "debug" || level === "warn" || level === "error" ? level : "info";
 }
 
+function asEmailEncryption(section: Record<string, TomlValue> | undefined): ServerConfig["email"]["encryption"] {
+  const encryption = asString(section?.encryption).trim().toLowerCase();
+  if (encryption === "ssl") return "ssl";
+  if (encryption === "tls") return "tls";
+  if (asBoolean(section?.secure)) return "ssl";
+  if (asNumber(section?.port, 587) === 465) return "ssl";
+  return "tls";
+}
+
 function configCandidates(): string[] {
   if (process.env.CAMPUSFORGE_CONFIG) {
     return [process.env.CAMPUSFORGE_CONFIG];
@@ -238,10 +249,11 @@ export function loadServerConfig(): ServerConfig {
         },
         email: {
           mode: asString(parsed.email?.mode).trim() === "smtp" ? "smtp" : "log",
+          encryption: asEmailEncryption(parsed.email),
           from: asString(parsed.email?.from).trim(),
           host: asString(parsed.email?.host).trim(),
-          port: asNumber(parsed.email?.port, DEFAULT_CONFIG.email.port),
-          secure: asBoolean(parsed.email?.secure),
+          port: asEmailEncryption(parsed.email) === "ssl" ? 465 : 587,
+          secure: asEmailEncryption(parsed.email) === "ssl",
           user: asString(parsed.email?.user).trim(),
           pass: asString(parsed.email?.pass),
         },

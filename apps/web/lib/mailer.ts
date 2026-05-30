@@ -16,8 +16,9 @@ export async function sendEmailVerificationCode(
 
   const transporter = nodemailer.createTransport({
     host: config.email.host,
-    port: config.email.port,
-    secure: config.email.secure,
+    port: config.email.encryption === "ssl" ? 465 : 587,
+    secure: config.email.encryption === "ssl",
+    requireTLS: config.email.encryption === "tls",
     auth: config.email.user
       ? {
           user: config.email.user,

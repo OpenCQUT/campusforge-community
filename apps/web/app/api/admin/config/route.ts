@@ -28,6 +28,7 @@ interface ConfigBody {
   };
   email?: {
     mode?: unknown;
+    encryption?: unknown;
     from?: unknown;
     host?: unknown;
     port?: unknown;
@@ -85,6 +86,7 @@ function publicConfig(config: ServerConfig) {
     storage: config.storage,
     email: {
       mode: config.email.mode,
+      encryption: config.email.encryption,
       from: config.email.from,
       host: config.email.host,
       port: config.email.port,
@@ -121,6 +123,10 @@ function stringListFrom(value: unknown, fallback: string[]): string[] {
   }
 
   return fallback;
+}
+
+function emailEncryptionFrom(value: unknown, fallback: ServerConfig["email"]["encryption"]): ServerConfig["email"]["encryption"] {
+  return value === "ssl" || value === "tls" ? value : fallback;
 }
 
 export async function GET(request: Request) {
@@ -179,10 +185,11 @@ export async function PUT(request: Request) {
     email: {
       ...existingRuntime.email,
       mode: email.mode === "smtp" ? "smtp" : "log",
+      encryption: emailEncryptionFrom(email.encryption, config.email.encryption),
       from: typeof email.from === "string" ? email.from.trim() : "",
       host: typeof email.host === "string" ? email.host.trim() : "",
-      port: numberFrom(email.port, config.email.port),
-      secure: Boolean(email.secure),
+      port: emailEncryptionFrom(email.encryption, config.email.encryption) === "ssl" ? 465 : 587,
+      secure: emailEncryptionFrom(email.encryption, config.email.encryption) === "ssl",
       user: typeof email.user === "string" ? email.user.trim() : "",
       pass:
         typeof email.pass === "string" && email.pass.length > 0

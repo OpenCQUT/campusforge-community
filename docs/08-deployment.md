@@ -67,6 +67,7 @@ password = ""
 ```toml
 [email]
 mode = "smtp"
+encryption = "tls"
 from = "CampusForge <noreply@example.edu>"
 host = "smtp.example.edu"
 port = 587
@@ -74,6 +75,10 @@ secure = false
 user = "smtp-user"
 pass = "smtp-password"
 ```
+
+SMTP 加密模式会归一化端口：`encryption = "tls"` 使用 STARTTLS 并固定为 587；
+`encryption = "ssl"` 使用隐式 SSL 并固定为 465。旧配置中的 `secure = true` 或
+`port = 465` 会被兼容识别为 SSL。
 
 如果 `mode = "smtp"` 但 `host` 或 `from` 为空，验证码接口会返回配置错误，不会假装发送成功。
 管理员也可以登录网页后在个人中心的服务器配置区域修改 SMTP 和验证码参数。网页保存的配置
